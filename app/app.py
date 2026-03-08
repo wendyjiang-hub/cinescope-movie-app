@@ -24,7 +24,8 @@ def inject_globals():
         genres = get_genres()
     except Exception:
         pass
-    return {"genres": genres}
+    from datetime import datetime
+    return {"genres": genres, "now": datetime.utcnow, "datetime": datetime}
 
 
 @app.route("/")
@@ -48,11 +49,30 @@ def index():
 
 @app.route("/movie/<int:movie_id>")
 def movie_detail(movie_id):
+    from datetime import datetime, date
     try:
         movie = get_movie_details(movie_id)
-    except Exception as e:
+    except Exception:
         abort(404)
-    return render_template("movie.html", movie=movie)
+
+    # Work out cinema status from release_date
+    cinema_status = "unknown"   # no date info
+    release_str = movie.get("release_date", "")
+    if release_str:
+        try:
+            rel = datetime.strptime(release_str, "%Y-%m-%d").date()
+            today = date.today()
+            days_since = (today - rel).days
+            if days_since < 0:
+                cinema_status = "coming_soon"      # future
+            elif days_since <= 42:
+                cinema_status = "in_cinemas"       # released within 6 weeks
+            else:
+                cinema_status = "left_cinemas"     # older than 6 weeks
+        except ValueError:
+            pass
+
+    return render_template("movie.html", movie=movie, cinema_status=cinema_status)
 
 
 @app.route("/search")

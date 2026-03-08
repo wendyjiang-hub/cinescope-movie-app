@@ -3,100 +3,12 @@
 
 {% block extra_head %}
 <style>
-  /* ── INLINE CINEMA FINDER ── */
-  .inline-cinema-box {
-    background: var(--ink);
-    border: 1px solid var(--gold);
-    padding: 1.4rem 1.6rem;
-    margin-bottom: 2.2rem;
-  }
-  .inline-cinema-header {
-    display: flex; align-items: center; gap: .9rem;
-    margin-bottom: 1rem;
-  }
-  .inline-cinema-icon { font-size: 1.6rem; flex-shrink: 0; }
-  .inline-cinema-title {
-    font-family: var(--ff-title); letter-spacing: .08em;
-    font-size: 1.15rem; color: var(--gold);
-  }
-  .inline-cinema-hint {
-    font-size: .75rem; color: rgba(255,255,255,.4);
-    margin-top: .1rem;
-  }
-  .inline-cinema-form {
-    display: flex; gap: .5rem; flex-wrap: wrap;
-  }
-  .inline-cinema-input {
-    flex: 1; min-width: 180px;
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(200,169,110,.4);
-    color: #fff; font-family: var(--ff-body); font-size: .88rem;
-    padding: .55rem .9rem; outline: none;
-    transition: border-color .2s;
-  }
-  .inline-cinema-input:focus { border-color: var(--gold); }
-  .inline-cinema-input::placeholder { color: rgba(255,255,255,.3); }
-  .inline-cinema-select {
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(200,169,110,.4);
-    color: #fff; font-family: var(--ff-body); font-size: .85rem;
-    padding: .55rem .6rem; outline: none; cursor: pointer;
-    width: 80px;
-  }
-  .inline-cinema-select option { background: #111; }
-  .inline-cinema-btn {
-    background: var(--gold); color: var(--ink);
-    border: 2px solid var(--gold); cursor: pointer;
-    padding: .55rem 1.3rem;
-    font-family: var(--ff-body); font-size: .78rem;
-    font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
-    transition: background .2s, color .2s;
-  }
-  .inline-cinema-btn:hover { background: transparent; color: var(--gold); }
-
-  /* Results inside inline box */
-  #cinema-results-inline { margin-top: 1.1rem; }
-  .ic-location-label {
-    font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
-    color: rgba(255,255,255,.35); margin-bottom: .8rem;
-  }
-  .ic-location-label strong { color: var(--gold); }
-  .ic-list { display: flex; flex-direction: column; gap: .5rem; }
-  .ic-card {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: .8rem; flex-wrap: wrap;
-    background: rgba(255,255,255,.04);
-    border: 1px solid rgba(255,255,255,.08);
-    padding: .75rem 1rem;
-    transition: border-color .2s;
-  }
-  .ic-card:hover { border-color: rgba(200,169,110,.4); }
-  .ic-card-left { display: flex; align-items: center; gap: .8rem; }
-  .ic-chain-dot {
-    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
-  }
-  .ic-name { font-size: .88rem; font-weight: 500; color: #fff; }
-  .ic-meta { font-size: .72rem; color: rgba(255,255,255,.35); margin-top: .1rem; }
-  .ic-ticket {
-    display: inline-block;
-    background: transparent; color: var(--gold);
-    border: 1px solid rgba(200,169,110,.5);
-    padding: .3rem .85rem;
-    font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
-    font-weight: 500; text-decoration: none; white-space: nowrap;
-    transition: background .2s, color .2s;
-  }
-  .ic-ticket:hover { background: var(--gold); color: var(--ink); }
-  .ic-none { color: rgba(255,255,255,.35); font-size: .85rem; font-style: italic; padding: .4rem 0; }
-  .ic-error { color: #e06c75; font-size: .83rem; padding: .3rem 0; }
-<style>
   /* ── HERO ── */
   .hero {
     position: relative;
-    min-height: 520px;
+    min-height: 480px;
     display: flex; align-items: flex-end;
     overflow: hidden;
-    margin-bottom: 0;
   }
   .hero-bg {
     position: absolute; inset: 0;
@@ -108,11 +20,7 @@
   .hero:hover .hero-bg { transform: scale(1.0); }
   .hero-gradient {
     position: absolute; inset: 0;
-    background: linear-gradient(
-      to bottom,
-      transparent 30%,
-      var(--ink) 100%
-    );
+    background: linear-gradient(to bottom, transparent 30%, var(--ink) 100%);
   }
   .hero-content {
     position: relative; z-index: 2;
@@ -124,7 +32,6 @@
     width: 180px; flex-shrink: 0;
     border: 2px solid rgba(200,169,110,.4);
     box-shadow: 0 20px 60px rgba(0,0,0,.6);
-    display: block;
     transform: translateY(40px);
   }
   .hero-poster img { display: block; width: 100%; }
@@ -132,7 +39,6 @@
   .hero-tagline {
     font-family: var(--ff-serif); font-style: italic;
     color: var(--gold); font-size: .9rem; margin-bottom: .6rem;
-    letter-spacing: .05em;
   }
   .hero-title {
     font-family: var(--ff-title);
@@ -155,10 +61,7 @@
   }
 
   /* ── DETAIL BODY ── */
-  .detail-wrap {
-    background: var(--paper);
-    padding-top: 3.5rem; /* accounts for poster offset */
-  }
+  .detail-wrap { background: var(--paper); padding-top: 3.5rem; }
   .detail-layout {
     max-width: 1320px; margin: 0 auto; padding: 0 2.5rem 4rem;
     display: grid;
@@ -166,14 +69,12 @@
     gap: 3.5rem;
   }
 
-  /* ── MAIN COLUMN ── */
-  .detail-main {}
-
+  /* score row */
   .score-row {
     display: flex; align-items: center; gap: 1.5rem;
     padding: 1.2rem 0 1.8rem;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 2rem;
+    margin-bottom: 1.8rem;
   }
   .score-big {
     font-family: var(--ff-title);
@@ -181,69 +82,137 @@
     color: var(--gold); letter-spacing: .03em;
   }
   .score-sub { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
-
   .star-bar { display: flex; gap: 3px; margin-bottom: .25rem; }
   .star { color: var(--gold-dim); font-size: 1.1rem; }
   .star.on { color: var(--gold); }
-
   .trailer-btn {
     margin-left: auto;
     display: inline-flex; align-items: center; gap: .55rem;
     background: var(--red); color: #fff;
     padding: .6rem 1.3rem; text-decoration: none;
     font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 500;
-    border: 2px solid var(--red);
-    transition: background .2s, color .2s;
+    border: 2px solid var(--red); transition: background .2s, color .2s;
   }
   .trailer-btn:hover { background: transparent; color: var(--red); }
 
+  /* ── CINEMA FINDER BOX ── */
+  .cinema-box {
+    background: var(--ink);
+    border: 1px solid var(--gold);
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 2.2rem;
+  }
+  .cinema-box-header {
+    display: flex; align-items: center; gap: .9rem;
+    margin-bottom: 1rem;
+  }
+  .cinema-box-icon { font-size: 1.5rem; }
+  .cinema-box-title {
+    font-family: var(--ff-title); letter-spacing: .08em;
+    font-size: 1.15rem; color: var(--gold);
+  }
+  .cinema-box-hint { font-size: .73rem; color: rgba(255,255,255,.4); margin-top: .1rem; }
+  .cinema-box-form { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .cinema-box-input {
+    flex: 1; min-width: 180px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(200,169,110,.4);
+    color: #fff; font-family: var(--ff-body); font-size: .88rem;
+    padding: .55rem .9rem; outline: none;
+    transition: border-color .2s;
+  }
+  .cinema-box-input:focus { border-color: var(--gold); }
+  .cinema-box-input::placeholder { color: rgba(255,255,255,.35); }
+  .cinema-box-select {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(200,169,110,.4);
+    color: #fff; font-family: var(--ff-body); font-size: .85rem;
+    padding: .55rem .6rem; outline: none; cursor: pointer; width: 85px;
+  }
+  .cinema-box-select option { background: #111; }
+  .cinema-box-btn {
+    background: var(--gold); color: var(--ink);
+    border: 2px solid var(--gold); cursor: pointer;
+    padding: .55rem 1.4rem;
+    font-family: var(--ff-body); font-size: .78rem;
+    font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+    transition: background .2s, color .2s;
+  }
+  .cinema-box-btn:hover { background: transparent; color: var(--gold); }
+  .cinema-box-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* results */
+  #cinema-results { margin-top: 1.1rem; }
+  .cr-label {
+    font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+    color: rgba(255,255,255,.35); margin-bottom: .75rem;
+  }
+  .cr-label strong { color: var(--gold); }
+  .cr-list { display: flex; flex-direction: column; gap: .45rem; }
+  .cr-card {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: .8rem; flex-wrap: wrap;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    padding: .7rem 1rem;
+    transition: border-color .2s;
+  }
+  .cr-card:hover { border-color: rgba(200,169,110,.4); }
+  .cr-left { display: flex; align-items: center; gap: .75rem; }
+  .cr-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .cr-name { font-size: .88rem; font-weight: 500; color: #fff; }
+  .cr-meta { font-size: .71rem; color: rgba(255,255,255,.35); margin-top: .1rem; }
+  .cr-btn {
+    display: inline-block;
+    background: transparent; color: var(--gold);
+    border: 1px solid rgba(200,169,110,.5);
+    padding: .32rem .85rem;
+    font-size: .71rem; letter-spacing: .1em; text-transform: uppercase;
+    font-weight: 500; text-decoration: none; white-space: nowrap;
+    transition: background .2s, color .2s;
+  }
+  .cr-btn:hover { background: var(--gold); color: var(--ink); }
+  .cr-none { color: rgba(255,255,255,.35); font-size: .84rem; font-style: italic; padding: .3rem 0; }
+  .released-box { border-color: #6fcf97 !important; }
+  .released-box .cinema-box-hint { color: rgba(255,255,255,.55); font-size: .82rem; margin-top: .3rem; line-height: 1.5; }
+  .cr-error { color: #e06c75; font-size: .83rem; padding: .3rem 0; }
+
+  /* section titles */
   .section-title {
     font-family: var(--ff-title);
     font-size: 1.5rem; letter-spacing: .08em;
-    margin-bottom: 1rem;
-    padding-bottom: .4rem;
+    margin-bottom: 1rem; padding-bottom: .4rem;
     border-bottom: 1px solid var(--border);
   }
+  .overview-text { font-size: 1rem; line-height: 1.75; color: #2a2a2a; margin-bottom: 2.5rem; }
 
-  .overview-text {
-    font-size: 1rem; line-height: 1.75; color: #2a2a2a;
-    margin-bottom: 2.5rem;
-  }
-
-  /* Cast */
+  /* cast */
   .cast-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
-    gap: 1rem .8rem;
-    margin-bottom: 3rem;
+    gap: 1rem .8rem; margin-bottom: 3rem;
   }
   .cast-card { text-align: center; }
   .cast-avatar {
-    width: 100%; aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    display: block; margin-bottom: .4rem;
-    background: var(--cream);
+    width: 100%; aspect-ratio: 1; object-fit: cover;
+    border-radius: 50%; border: 2px solid var(--border);
+    display: block; margin-bottom: .4rem; background: var(--cream);
   }
   .cast-name { font-size: .72rem; font-weight: 500; line-height: 1.3; }
   .cast-char { font-size: .68rem; color: var(--muted); font-style: italic; }
 
-  /* Similar */
+  /* similar */
   .similar-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 1.2rem 1rem;
-    margin-bottom: 2rem;
+    gap: 1.2rem 1rem; margin-bottom: 2rem;
   }
 
-  /* ── SIDEBAR ── */
+  /* sidebar */
   .detail-sidebar {}
   .sidebar-block {
-    background: var(--cream);
-    padding: 1.4rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--border);
+    background: var(--cream); padding: 1.4rem;
+    margin-bottom: 1.5rem; border: 1px solid var(--border);
   }
   .sidebar-block h3 {
     font-family: var(--ff-title); letter-spacing: .1em;
@@ -251,27 +220,36 @@
   }
   .fact-row {
     display: flex; justify-content: space-between; align-items: baseline;
-    padding: .45rem 0;
-    border-bottom: 1px solid var(--border);
-    font-size: .82rem;
-    gap: .5rem;
+    padding: .45rem 0; border-bottom: 1px solid var(--border);
+    font-size: .82rem; gap: .5rem;
   }
   .fact-row:last-child { border-bottom: none; }
   .fact-label { color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; flex-shrink: 0; }
   .fact-value { text-align: right; font-weight: 500; }
 
+  /* card reuse */
+  .card { display: block; text-decoration: none; color: inherit; position: relative; transition: transform .3s cubic-bezier(.25,.46,.45,.94); }
+  .card:hover { transform: translateY(-6px); }
+  .card-poster { position: relative; overflow: hidden; aspect-ratio: 2/3; background: var(--cream); border: 1px solid var(--border); }
+  .card-poster img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+  .card:hover .card-poster img { transform: scale(1.04); }
+  .card-score { position: absolute; top: .6rem; right: .6rem; background: var(--ink); color: var(--gold); font-family: var(--ff-title); font-size: 1rem; padding: .2rem .5rem; border: 1px solid var(--gold-dim); }
+  .card-info { padding: .7rem 0 0; }
+  .card-title { font-family: var(--ff-body); font-weight: 500; font-size: .9rem; line-height: 1.25; margin-bottom: .2rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-meta { font-size: .75rem; color: var(--muted); }
+  .card-no-image { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-family: var(--ff-title); font-size: 3rem; color: var(--border); }
+
   @media (max-width: 900px) {
-    .detail-layout { grid-template-columns: 1fr; gap: 2rem; }
+    .detail-layout { grid-template-columns: 1fr; gap: 2rem; padding: 0 1.2rem 3rem; }
     .hero-content { flex-direction: column; gap: 1.5rem; padding: 2rem 1.2rem; }
     .hero-poster { width: 130px; transform: none; }
-    .detail-layout { padding: 0 1.2rem 3rem; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
 
-{# Hero #}
+{# ── HERO ── #}
 <div class="hero">
   {% if movie.backdrop_url %}
   <div class="hero-bg" style="background-image:url('{{ movie.backdrop_url }}')"></div>
@@ -302,13 +280,14 @@
   </div>
 </div>
 
-{# Body #}
+{# ── BODY ── #}
 <div class="detail-wrap">
 <div class="detail-layout">
 
-  {# Main #}
+  {# Main column #}
   <div class="detail-main">
 
+    {# Rating + Trailer #}
     <div class="score-row">
       {% if movie.vote_average %}
       <div>
@@ -329,29 +308,58 @@
       {% endif %}
     </div>
 
-    {# ── CINEMA FINDER ── #}
-    <div class="inline-cinema-box">
-      <div class="inline-cinema-header">
-        <span class="inline-cinema-icon">🎟</span>
+    {# ── CINEMA FINDER or Released notice ── #}
+    {# cinema_status set in Python: coming_soon | in_cinemas | left_cinemas | unknown #}
+
+    {% if cinema_status == 'left_cinemas' %}
+    {# Older than 6 weeks — no longer in cinemas #}
+    <div class="cinema-box released-box">
+      <div class="cinema-box-header">
+        <span class="cinema-box-icon">📺</span>
         <div>
-          <div class="inline-cinema-title">Find Tickets Near You</div>
-          <div class="inline-cinema-hint">Enter your city or UK postcode</div>
+          <div class="cinema-box-title" style="color:#6fcf97;">No Longer Showing in Cinemas</div>
+          <div class="cinema-box-hint">
+            Released {{ movie.release_date }} — now available on streaming platforms and home video.
+          </div>
         </div>
       </div>
-      <div class="inline-cinema-form">
-        <input class="inline-cinema-input" id="cinema-loc" type="text"
-          placeholder="e.g. Liverpool, L1 8JQ, Manchester…" autocomplete="off" />
-        <select class="inline-cinema-select" id="cinema-radius">
-          <option value="5">5 mi</option>
-          <option value="10">10 mi</option>
-          <option value="15" selected>15 mi</option>
-          <option value="25">25 mi</option>
-          <option value="40">40 mi</option>
-        </select>
-        <button class="inline-cinema-btn" id="cinema-btn" onclick="searchCinemas()">Search</button>
-      </div>
-      <div id="cinema-results-inline"></div>
     </div>
+    {% else %}
+    {# Coming soon or currently in cinemas — show postcode finder #}
+    <div class="cinema-box">
+      <div class="cinema-box-header">
+        <span class="cinema-box-icon">{% if cinema_status == 'in_cinemas' %}🎬{% else %}🎟{% endif %}</span>
+        <div>
+          <div class="cinema-box-title">
+            {% if cinema_status == 'in_cinemas' %}Now Showing — Find Tickets Near You
+            {% elif cinema_status == 'coming_soon' %}Coming Soon — Find Advance Tickets
+            {% else %}Find Tickets Near You
+            {% endif %}
+          </div>
+          <div class="cinema-box-hint">
+            {% if cinema_status == 'in_cinemas' %}In cinemas since {{ movie.release_date }}. {% endif %}
+            {% if cinema_status == 'coming_soon' %}Opens {{ movie.release_date }}. {% endif %}
+            Enter your UK city or postcode to find nearby cinemas.
+          </div>
+        </div>
+      </div>
+      <div class="cinema-box-form">
+        <input class="cinema-box-input" id="cinema-loc" type="text"
+          placeholder="e.g. Liverpool, Manchester, L1 8JQ…" autocomplete="off" />
+        <select class="cinema-box-select" id="cinema-radius">
+          <option value="5">5 miles</option>
+          <option value="10">10 miles</option>
+          <option value="15" selected>15 miles</option>
+          <option value="25">25 miles</option>
+          <option value="40">40 miles</option>
+        </select>
+        <button class="cinema-box-btn" id="cinema-btn" onclick="searchCinemas()">
+          Search
+        </button>
+      </div>
+      <div id="cinema-results"></div>
+    </div>
+    {% endif %}
 
     {% if movie.overview %}
     <h2 class="section-title">Synopsis</h2>
@@ -410,26 +418,19 @@
       {% if movie.revenue %}<div class="fact-row"><span class="fact-label">Revenue</span><span class="fact-value">${{ '{:,}'.format(movie.revenue) }}</span></div>{% endif %}
       {% if movie.original_language %}<div class="fact-row"><span class="fact-label">Language</span><span class="fact-value">{{ movie.original_language|upper }}</span></div>{% endif %}
     </div>
-
     {% if movie.production_companies %}
     <div class="sidebar-block">
       <h3>Production</h3>
       {% for co in movie.production_companies[:4] %}
-      <div class="fact-row">
-        <span class="fact-label">Studio</span>
-        <span class="fact-value">{{ co.name }}</span>
-      </div>
+      <div class="fact-row"><span class="fact-label">Studio</span><span class="fact-value">{{ co.name }}</span></div>
       {% endfor %}
     </div>
     {% endif %}
-
     {% if movie.spoken_languages %}
     <div class="sidebar-block">
       <h3>Languages</h3>
       {% for lang in movie.spoken_languages %}
-      <div class="fact-row">
-        <span class="fact-value">{{ lang.english_name }}</span>
-      </div>
+      <div class="fact-row"><span class="fact-value">{{ lang.english_name }}</span></div>
       {% endfor %}
     </div>
     {% endif %}
@@ -437,285 +438,60 @@
 
 </div>
 </div>
-{% endblock %}
-
-{% block extra_cinema %}
-<style>
-  /* ── CINEMA FINDER SECTION ── */
-  .cinema-section {
-    background: var(--ink);
-    color: var(--paper);
-    padding: 3.5rem 0;
-    margin-top: 0;
-    border-top: 2px solid var(--gold);
-  }
-  .cinema-inner {
-    max-width: 1320px; margin: 0 auto; padding: 0 2.5rem;
-  }
-  .cinema-heading {
-    font-family: var(--ff-title);
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
-    letter-spacing: .06em; color: var(--gold);
-    margin-bottom: .4rem;
-  }
-  .cinema-sub {
-    font-family: var(--ff-serif); font-style: italic;
-    color: rgba(255,255,255,.45); font-size: .95rem;
-    margin-bottom: 1.8rem;
-  }
-  .cinema-form {
-    display: flex; gap: .6rem; flex-wrap: wrap;
-    margin-bottom: 2rem;
-  }
-  .cinema-input {
-    flex: 1; min-width: 200px;
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(200,169,110,.35);
-    color: #fff; font-family: var(--ff-body); font-size: .9rem;
-    padding: .65rem 1.1rem; outline: none;
-    transition: border-color .2s;
-  }
-  .cinema-input:focus { border-color: var(--gold); }
-  .cinema-input::placeholder { color: rgba(255,255,255,.3); }
-  .cinema-radius {
-    width: 110px;
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(200,169,110,.35);
-    color: #fff; font-family: var(--ff-body); font-size: .9rem;
-    padding: .65rem .8rem; outline: none;
-  }
-  .cinema-radius option { background: #111; }
-  .cinema-btn {
-    background: var(--gold); color: var(--ink);
-    border: 2px solid var(--gold); cursor: pointer;
-    padding: .65rem 1.6rem;
-    font-family: var(--ff-body); font-size: .8rem;
-    font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
-    transition: background .2s, color .2s;
-  }
-  .cinema-btn:hover { background: transparent; color: var(--gold); }
-
-  /* Results */
-  .cinema-results { display: none; }
-  .cinema-results.visible { display: block; }
-  .cinema-location-label {
-    font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
-    color: rgba(255,255,255,.4); margin-bottom: 1.2rem;
-  }
-  .cinema-location-label strong { color: var(--gold); }
-
-  .cinema-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
-  }
-  .cinema-card {
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.1);
-    padding: 1.2rem 1.4rem;
-    display: flex; flex-direction: column; gap: .5rem;
-    transition: border-color .2s, background .2s;
-  }
-  .cinema-card:hover { border-color: var(--gold); background: rgba(200,169,110,.07); }
-
-  .cinema-card-top {
-    display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem;
-  }
-  .cinema-name {
-    font-weight: 500; font-size: .95rem; line-height: 1.3;
-  }
-  .cinema-chain-badge {
-    font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
-    padding: .15rem .5rem; border-radius: 2px; flex-shrink: 0;
-    font-weight: 600; color: #fff;
-  }
-  .cinema-distance {
-    font-size: .78rem; color: rgba(255,255,255,.4);
-  }
-  .cinema-city {
-    font-size: .78rem; color: rgba(255,255,255,.35);
-    font-family: var(--ff-serif); font-style: italic;
-  }
-  .cinema-ticket-btn {
-    display: inline-block; margin-top: .4rem;
-    background: transparent; color: var(--gold);
-    border: 1px solid rgba(200,169,110,.5);
-    padding: .4rem .9rem;
-    font-size: .75rem; letter-spacing: .1em; text-transform: uppercase;
-    font-weight: 500; text-decoration: none;
-    transition: background .2s, color .2s;
-    align-self: flex-start;
-  }
-  .cinema-ticket-btn:hover { background: var(--gold); color: var(--ink); }
-
-  .cinema-none {
-    color: rgba(255,255,255,.4);
-    font-family: var(--ff-serif); font-style: italic;
-    font-size: 1rem; padding: 1.5rem 0;
-  }
-  .cinema-error {
-    color: #e06c75;
-    font-size: .88rem; padding: .6rem 0;
-  }
-  .cinema-spinner {
-    display: none;
-    width: 20px; height: 20px;
-    border: 2px solid rgba(200,169,110,.3);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-    margin-left: .5rem;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-</style>
-
-<div class="cinema-section">
-  <div class="cinema-inner">
-    <h2 class="cinema-heading">Find Tickets Near You</h2>
-    <p class="cinema-sub">Enter your city or UK postcode to see nearby cinemas</p>
-
-    <div class="cinema-form">
-      <input class="cinema-input" id="cinema-loc" type="text"
-        placeholder="e.g. Liverpool, Manchester, L1 8JQ…" autocomplete="off" />
-      <select class="cinema-radius" id="cinema-radius">
-        <option value="5">5 miles</option>
-        <option value="10">10 miles</option>
-        <option value="15" selected>15 miles</option>
-        <option value="25">25 miles</option>
-        <option value="40">40 miles</option>
-      </select>
-      <button class="cinema-btn" id="cinema-search-btn" onclick="searchCinemas()">
-        Find Cinemas
-      </button>
-      <div class="cinema-spinner" id="cinema-spinner"></div>
-    </div>
-
-    <div class="cinema-results" id="cinema-results">
-      <p class="cinema-location-label" id="cinema-loc-label"></p>
-      <div class="cinema-list" id="cinema-list"></div>
-    </div>
-  </div>
-</div>
 
 <script>
-  // Allow pressing Enter in the input
   document.getElementById('cinema-loc').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') searchCinemas();
   });
 
   async function searchCinemas() {
-    const loc = document.getElementById('cinema-loc').value.trim();
-    const radius = document.getElementById('cinema-radius').value;
-    const resultsEl = document.getElementById('cinema-results');
-    const listEl = document.getElementById('cinema-list');
-    const labelEl = document.getElementById('cinema-loc-label');
-    const spinner = document.getElementById('cinema-spinner');
-    const btn = document.getElementById('cinema-search-btn');
-
-    if (!loc) {
-      listEl.innerHTML = '<p class="cinema-error">Please enter a city or postcode.</p>';
-      resultsEl.classList.add('visible');
-      return;
-    }
-
-    btn.disabled = true;
-    spinner.style.display = 'block';
-    listEl.innerHTML = '';
-    labelEl.textContent = '';
-    resultsEl.classList.remove('visible');
-
-    try {
-      const res = await fetch(`/api/cinemas?location=${encodeURIComponent(loc)}&radius=${radius}`);
-      const data = await res.json();
-
-      if (data.error) {
-        listEl.innerHTML = `<p class="cinema-error">⚠ ${data.error}</p>`;
-      } else if (!data.cinemas || data.cinemas.length === 0) {
-        labelEl.innerHTML = `Showing results near <strong>${data.location}</strong>`;
-        listEl.innerHTML = '<p class="cinema-none">No cinemas found within this radius. Try increasing the distance.</p>';
-      } else {
-        labelEl.innerHTML = `${data.cinemas.length} cinema${data.cinemas.length > 1 ? 's' : ''} near <strong>${data.location}</strong>`;
-        listEl.innerHTML = data.cinemas.map(c => `
-          <div class="cinema-card">
-            <div class="cinema-card-top">
-              <span class="cinema-name">${c.name}</span>
-              <span class="cinema-chain-badge" style="background:${c.chain_colour}">${c.chain}</span>
-            </div>
-            <span class="cinema-city">${c.city}</span>
-            <span class="cinema-distance">📍 ${c.distance_miles} miles away</span>
-            <a class="cinema-ticket-btn" href="${c.ticket_url}" target="_blank" rel="noopener">
-              Buy Tickets →
-            </a>
-          </div>
-        `).join('');
-      }
-      resultsEl.classList.add('visible');
-    } catch (err) {
-      listEl.innerHTML = '<p class="cinema-error">⚠ Network error. Please try again.</p>';
-      resultsEl.classList.add('visible');
-    } finally {
-      btn.disabled = false;
-      spinner.style.display = 'none';
-    }
-  }
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var input = document.getElementById('cinema-loc');
-    if (input) {
-      input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') searchCinemas();
-      });
-    }
-  });
-
-  async function searchCinemas() {
-    var loc = document.getElementById('cinema-loc').value.trim();
+    var loc    = document.getElementById('cinema-loc').value.trim();
     var radius = document.getElementById('cinema-radius').value;
-    var resultsEl = document.getElementById('cinema-results-inline');
-    var btn = document.getElementById('cinema-btn');
+    var out    = document.getElementById('cinema-results');
+    var btn    = document.getElementById('cinema-btn');
 
     if (!loc) {
-      resultsEl.innerHTML = '<p class="ic-error">⚠ Please enter a city or postcode.</p>';
+      out.innerHTML = '<p class="cr-error">⚠ Please enter a city or postcode.</p>';
       return;
     }
-
     btn.textContent = '…';
     btn.disabled = true;
-    resultsEl.innerHTML = '';
+    out.innerHTML = '';
 
     try {
-      var res = await fetch('/api/cinemas?location=' + encodeURIComponent(loc) + '&radius=' + radius);
+      var res  = await fetch('/api/cinemas?location=' + encodeURIComponent(loc) + '&radius=' + radius);
       var data = await res.json();
 
       if (data.error) {
-        resultsEl.innerHTML = '<p class="ic-error">⚠ ' + data.error + '</p>';
+        out.innerHTML = '<p class="cr-error">⚠ ' + data.error + '</p>';
       } else if (!data.cinemas || data.cinemas.length === 0) {
-        resultsEl.innerHTML = '<p class="ic-location-label">Near <strong>' + data.location + '</strong></p><p class="ic-none">No cinemas found within ' + radius + ' miles. Try a larger radius.</p>';
+        out.innerHTML = '<p class="cr-label">Near <strong>' + data.location + '</strong></p>'
+          + '<p class="cr-none">No cinemas found within ' + radius + ' miles — try a larger radius.</p>';
       } else {
         var cards = data.cinemas.map(function(c) {
-          return '<div class="ic-card">' +
-            '<div class="ic-card-left">' +
-              '<div class="ic-chain-dot" style="background:' + c.chain_colour + '"></div>' +
-              '<div>' +
-                '<div class="ic-name">' + c.name + '</div>' +
-                '<div class="ic-meta">' + c.city + ' &nbsp;·&nbsp; ' + c.distance_miles + ' miles away</div>' +
-              '</div>' +
-            '</div>' +
-            '<a class="ic-ticket" href="' + c.ticket_url + '" target="_blank" rel="noopener">Buy Tickets →</a>' +
-          '</div>';
+          return '<div class="cr-card">'
+            + '<div class="cr-left">'
+            +   '<div class="cr-dot" style="background:' + c.chain_colour + '"></div>'
+            +   '<div>'
+            +     '<div class="cr-name">' + c.name + '</div>'
+            +     '<div class="cr-meta">' + c.city + ' &nbsp;·&nbsp; ' + c.distance_miles + ' miles</div>'
+            +   '</div>'
+            + '</div>'
+            + '<a class="cr-btn" href="' + c.ticket_url + '" target="_blank" rel="noopener">Buy Tickets →</a>'
+            + '</div>';
         }).join('');
-        resultsEl.innerHTML =
-          '<p class="ic-location-label">' + data.cinemas.length + ' cinema' + (data.cinemas.length > 1 ? 's' : '') + ' near <strong>' + data.location + '</strong></p>' +
-          '<div class="ic-list">' + cards + '</div>';
+        out.innerHTML = '<p class="cr-label">'
+          + data.cinemas.length + ' cinema' + (data.cinemas.length > 1 ? 's' : '')
+          + ' near <strong>' + data.location + '</strong></p>'
+          + '<div class="cr-list">' + cards + '</div>';
       }
-    } catch(err) {
-      resultsEl.innerHTML = '<p class="ic-error">⚠ Network error. Please try again.</p>';
+    } catch(e) {
+      out.innerHTML = '<p class="cr-error">⚠ Network error — please try again.</p>';
     } finally {
       btn.textContent = 'Search';
       btn.disabled = false;
     }
   }
 </script>
+
 {% endblock %}

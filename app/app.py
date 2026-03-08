@@ -4,13 +4,14 @@ import sys
 # Ensure the app directory is on the path so 'services' is importable
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, jsonify
 from services.tmdb_api import (
     get_trending_movies,
     get_movie_details,
     search_movies,
     get_genres,
 )
+from services.cinemas import find_nearby_cinemas
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
@@ -71,6 +72,25 @@ def search():
         page=page,
         total_pages=min(data.get("total_pages", 1), 500),
     )
+
+
+@app.route("/api/cinemas")
+def api_cinemas():
+    """GET /api/cinemas?location=Liverpool&radius=15"""
+    location = request.args.get("location", "").strip()
+    radius = request.args.get("radius", 15, type=float)
+
+    if not location:
+        return jsonify({"error": "Please enter a city or postcode."}), 400
+
+    try:
+        cinemas, display = find_nearby_cinemas(location, radius_miles=radius)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": "Something went wrong. Please try again."}), 500
+
+    return jsonify({"location": display, "cinemas": cinemas})
 
 
 @app.errorhandler(404)

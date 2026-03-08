@@ -1,7 +1,8 @@
 import os
 import sys
+from dotenv import load_dotenv
+load_dotenv()
 
-# Ensure the app directory is on the path so 'services' is importable
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from flask import Flask, render_template, request, abort, jsonify
@@ -19,12 +20,12 @@ app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 
 @app.context_processor
 def inject_globals():
+    from datetime import datetime
     genres = []
     try:
         genres = get_genres()
     except Exception:
         pass
-    from datetime import datetime
     return {"genres": genres, "now": datetime.utcnow, "datetime": datetime}
 
 
@@ -55,8 +56,7 @@ def movie_detail(movie_id):
     except Exception:
         abort(404)
 
-    # Work out cinema status from release_date
-    cinema_status = "unknown"   # no date info
+    cinema_status = "unknown"
     release_str = movie.get("release_date", "")
     if release_str:
         try:
@@ -64,11 +64,11 @@ def movie_detail(movie_id):
             today = date.today()
             days_since = (today - rel).days
             if days_since < 0:
-                cinema_status = "coming_soon"      # future
+                cinema_status = "coming_soon"
             elif days_since <= 42:
-                cinema_status = "in_cinemas"       # released within 6 weeks
+                cinema_status = "in_cinemas"
             else:
-                cinema_status = "left_cinemas"     # older than 6 weeks
+                cinema_status = "left_cinemas"
         except ValueError:
             pass
 
@@ -97,18 +97,25 @@ def search():
 @app.route("/api/cinemas")
 def api_cinemas():
     """GET /api/cinemas?location=Liverpool&radius=15"""
+    import traceback
     location = request.args.get("location", "").strip()
     radius = request.args.get("radius", 15, type=float)
 
     if not location:
         return jsonify({"error": "Please enter a city or postcode."}), 400
 
+    if not os.environ.get("GOOGLE_MAPS_API_KEY"):
+        return jsonify({"error": "Google Maps API key is not configured on the server."}), 500
+
     try:
         cinemas, display = find_nearby_cinemas(location, radius_miles=radius)
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 502
     except Exception as e:
-        return jsonify({"error": "Something went wrong. Please try again."}), 500
+        app.logger.error("Cinema search failed: %s\n%s", e, traceback.format_exc())
+        return jsonify({"error": "Search failed: " + str(e)}), 500
 
     return jsonify({"location": display, "cinemas": cinemas})
 

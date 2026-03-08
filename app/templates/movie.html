@@ -172,6 +172,7 @@
     transition: background .2s, color .2s;
   }
   .cr-btn:hover { background: var(--gold); color: var(--ink); }
+  .cr-btn-maps { padding: .32rem .6rem; }
   .cr-none { color: rgba(255,255,255,.35); font-size: .84rem; font-style: italic; padding: .3rem 0; }
   .released-box { border-color: #6fcf97 !important; }
   .released-box .cinema-box-hint { color: rgba(255,255,255,.55); font-size: .82rem; margin-top: .3rem; line-height: 1.5; }
@@ -469,15 +470,24 @@
           + '<p class="cr-none">No cinemas found within ' + radius + ' miles — try a larger radius.</p>';
       } else {
         var cards = data.cinemas.map(function(c) {
+          var stars = c.rating ? '⭐ ' + c.rating : '';
+          var ticketLabel = c.has_website ? 'Buy Tickets →' : 'View on Maps →';
           return '<div class="cr-card">'
             + '<div class="cr-left">'
             +   '<div class="cr-dot" style="background:' + c.chain_colour + '"></div>'
             +   '<div>'
             +     '<div class="cr-name">' + c.name + '</div>'
-            +     '<div class="cr-meta">' + c.city + ' &nbsp;·&nbsp; ' + c.distance_miles + ' miles</div>'
+            +     '<div class="cr-meta">'
+            +       c.address
+            +       (stars ? ' &nbsp;·&nbsp; ' + stars : '')
+            +       ' &nbsp;·&nbsp; ' + c.distance_miles + ' miles'
+            +     '</div>'
             +   '</div>'
             + '</div>'
-            + '<a class="cr-btn" href="' + c.ticket_url + '" target="_blank" rel="noopener">Buy Tickets →</a>'
+            + '<div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;">'
+            +   '<a class="cr-btn" href="' + c.ticket_url + '" target="_blank" rel="noopener">' + ticketLabel + '</a>'
+            +   (c.has_website ? '<a class="cr-btn cr-btn-maps" href="' + c.maps_url + '" target="_blank" rel="noopener" title="Open in Google Maps">🗺</a>' : '')
+            + '</div>'
             + '</div>';
         }).join('');
         out.innerHTML = '<p class="cr-label">'

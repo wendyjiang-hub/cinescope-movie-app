@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+{% block title %}{{ movie.title }} — Cinescope{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 520px;
+    display: flex; align-items: flex-end;
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center top;
+    filter: brightness(.38) saturate(.7);
+    transform: scale(1.03);
+    transition: transform 8s ease;
+  }
+  .hero:hover .hero-bg { transform: scale(1.0); }
+  .hero-gradient {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 30%,
+      var(--ink) 100%
+    );
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    padding: 3rem 2.5rem;
+    max-width: 1320px; width: 100%; margin: 0 auto;
+    display: flex; gap: 2.8rem; align-items: flex-end;
+  }
+  .hero-poster {
+    width: 180px; flex-shrink: 0;
+    border: 2px solid rgba(200,169,110,.4);
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    display: block;
+    transform: translateY(40px);
+  }
+  .hero-poster img { display: block; width: 100%; }
+  .hero-text { flex: 1; padding-bottom: .4rem; }
+  .hero-tagline {
+    font-family: var(--ff-serif); font-style: italic;
+    color: var(--gold); font-size: .9rem; margin-bottom: .6rem;
+    letter-spacing: .05em;
+  }
+  .hero-title {
+    font-family: var(--ff-title);
+    font-size: clamp(2.4rem, 6vw, 5rem);
+    letter-spacing: .04em; line-height: 1;
+    color: #fff; margin-bottom: .7rem;
+  }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; gap: .5rem 1.2rem;
+    font-size: .8rem; color: rgba(255,255,255,.6);
+    letter-spacing: .06em; text-transform: uppercase; margin-bottom: 1rem;
+  }
+  .hero-meta .sep { color: var(--gold-dim); }
+  .hero-genres { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .genre-tag {
+    padding: .2rem .65rem;
+    border: 1px solid rgba(200,169,110,.4);
+    color: var(--gold); font-size: .7rem;
+    letter-spacing: .1em; text-transform: uppercase;
+  }
+
+  /* ── DETAIL BODY ── */
+  .detail-wrap {
+    background: var(--paper);
+    padding-top: 3.5rem; /* accounts for poster offset */
+  }
+  .detail-layout {
+    max-width: 1320px; margin: 0 auto; padding: 0 2.5rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 3.5rem;
+  }
+
+  /* ── MAIN COLUMN ── */
+  .detail-main {}
+
+  .score-row {
+    display: flex; align-items: center; gap: 1.5rem;
+    padding: 1.2rem 0 1.8rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  .score-big {
+    font-family: var(--ff-title);
+    font-size: 3.6rem; line-height: 1;
+    color: var(--gold); letter-spacing: .03em;
+  }
+  .score-sub { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+
+  .star-bar { display: flex; gap: 3px; margin-bottom: .25rem; }
+  .star { color: var(--gold-dim); font-size: 1.1rem; }
+  .star.on { color: var(--gold); }
+
+  .trailer-btn {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: .55rem;
+    background: var(--red); color: #fff;
+    padding: .6rem 1.3rem; text-decoration: none;
+    font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 500;
+    border: 2px solid var(--red);
+    transition: background .2s, color .2s;
+  }
+  .trailer-btn:hover { background: transparent; color: var(--red); }
+
+  .section-title {
+    font-family: var(--ff-title);
+    font-size: 1.5rem; letter-spacing: .08em;
+    margin-bottom: 1rem;
+    padding-bottom: .4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .overview-text {
+    font-size: 1rem; line-height: 1.75; color: #2a2a2a;
+    margin-bottom: 2.5rem;
+  }
+
+  /* Cast */
+  .cast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 1rem .8rem;
+    margin-bottom: 3rem;
+  }
+  .cast-card { text-align: center; }
+  .cast-avatar {
+    width: 100%; aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: block; margin-bottom: .4rem;
+    background: var(--cream);
+  }
+  .cast-name { font-size: .72rem; font-weight: 500; line-height: 1.3; }
+  .cast-char { font-size: .68rem; color: var(--muted); font-style: italic; }
+
+  /* Similar */
+  .similar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 1.2rem 1rem;
+    margin-bottom: 2rem;
+  }
+
+  /* ── SIDEBAR ── */
+  .detail-sidebar {}
+  .sidebar-block {
+    background: var(--cream);
+    padding: 1.4rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+  }
+  .sidebar-block h3 {
+    font-family: var(--ff-title); letter-spacing: .1em;
+    font-size: 1rem; margin-bottom: 1rem; color: var(--muted);
+  }
+  .fact-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: .45rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .82rem;
+    gap: .5rem;
+  }
+  .fact-row:last-child { border-bottom: none; }
+  .fact-label { color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; flex-shrink: 0; }
+  .fact-value { text-align: right; font-weight: 500; }
+
+  @media (max-width: 900px) {
+    .detail-layout { grid-template-columns: 1fr; gap: 2rem; }
+    .hero-content { flex-direction: column; gap: 1.5rem; padding: 2rem 1.2rem; }
+    .hero-poster { width: 130px; transform: none; }
+    .detail-layout { padding: 0 1.2rem 3rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# Hero #}
+<div class="hero">
+  {% if movie.backdrop_url %}
+  <div class="hero-bg" style="background-image:url('{{ movie.backdrop_url }}')"></div>
+  {% else %}
+  <div class="hero-bg" style="background:var(--ink)"></div>
+  {% endif %}
+  <div class="hero-gradient"></div>
+  <div class="hero-content">
+    {% if movie.poster_url %}
+    <div class="hero-poster">
+      <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" />
+    </div>
+    {% endif %}
+    <div class="hero-text">
+      {% if movie.tagline %}<p class="hero-tagline">"{{ movie.tagline }}"</p>{% endif %}
+      <h1 class="hero-title">{{ movie.title }}</h1>
+      <div class="hero-meta">
+        {% if movie.release_date %}<span>{{ movie.release_date[:4] }}</span><span class="sep">·</span>{% endif %}
+        {% if movie.runtime %}<span>{{ movie.runtime }} min</span><span class="sep">·</span>{% endif %}
+        {% if movie.original_language %}<span>{{ movie.original_language|upper }}</span>{% endif %}
+      </div>
+      {% if movie.genres %}
+      <div class="hero-genres">
+        {% for g in movie.genres %}<span class="genre-tag">{{ g.name }}</span>{% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{# Body #}
+<div class="detail-wrap">
+<div class="detail-layout">
+
+  {# Main #}
+  <div class="detail-main">
+
+    <div class="score-row">
+      {% if movie.vote_average %}
+      <div>
+        {% set stars = (movie.vote_average / 2)|round|int %}
+        <div class="star-bar">
+          {% for i in range(1,6) %}
+            <span class="star {{ 'on' if i <= stars }}">★</span>
+          {% endfor %}
+        </div>
+        <div class="score-big">{{ '%.1f'|format(movie.vote_average) }}<span style="font-size:1.2rem;opacity:.4">/10</span></div>
+        <div class="score-sub">{{ movie.vote_count|default(0) }} votes</div>
+      </div>
+      {% endif %}
+      {% if movie.trailer_key %}
+      <a class="trailer-btn" href="https://youtube.com/watch?v={{ movie.trailer_key }}" target="_blank">
+        ▶ Watch Trailer
+      </a>
+      {% endif %}
+    </div>
+
+    {% if movie.overview %}
+    <h2 class="section-title">Synopsis</h2>
+    <p class="overview-text">{{ movie.overview }}</p>
+    {% endif %}
+
+    {% if movie.top_cast %}
+    <h2 class="section-title">Cast</h2>
+    <div class="cast-grid">
+      {% for p in movie.top_cast %}
+      <div class="cast-card">
+        {% if p.profile_url %}
+          <img class="cast-avatar" src="{{ p.profile_url }}" alt="{{ p.name }}" loading="lazy" />
+        {% else %}
+          <div class="cast-avatar" style="display:flex;align-items:center;justify-content:center;font-size:1.8rem;">👤</div>
+        {% endif %}
+        <div class="cast-name">{{ p.name }}</div>
+        <div class="cast-char">{{ p.character }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if movie.similar_movies %}
+    <h2 class="section-title">You Might Also Like</h2>
+    <div class="similar-grid">
+      {% for s in movie.similar_movies %}
+      <a class="card" href="/movie/{{ s.id }}">
+        <div class="card-poster">
+          {% if s.poster_url %}
+            <img src="{{ s.poster_url }}" alt="{{ s.title }}" loading="lazy" />
+          {% else %}
+            <div class="card-no-image">?</div>
+          {% endif %}
+          {% if s.vote_average %}<span class="card-score">{{ '%.1f'|format(s.vote_average) }}</span>{% endif %}
+        </div>
+        <div class="card-info">
+          <p class="card-title">{{ s.title }}</p>
+          <p class="card-meta">{{ s.release_date[:4] if s.release_date else '—' }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>{# /main #}
+
+  {# Sidebar #}
+  <aside class="detail-sidebar">
+    <div class="sidebar-block">
+      <h3>Film Info</h3>
+      {% if movie.status %}<div class="fact-row"><span class="fact-label">Status</span><span class="fact-value">{{ movie.status }}</span></div>{% endif %}
+      {% if movie.release_date %}<div class="fact-row"><span class="fact-label">Released</span><span class="fact-value">{{ movie.release_date }}</span></div>{% endif %}
+      {% if movie.runtime %}<div class="fact-row"><span class="fact-label">Runtime</span><span class="fact-value">{{ movie.runtime }} min</span></div>{% endif %}
+      {% if movie.budget %}<div class="fact-row"><span class="fact-label">Budget</span><span class="fact-value">${{ '{:,}'.format(movie.budget) }}</span></div>{% endif %}
+      {% if movie.revenue %}<div class="fact-row"><span class="fact-label">Revenue</span><span class="fact-value">${{ '{:,}'.format(movie.revenue) }}</span></div>{% endif %}
+      {% if movie.original_language %}<div class="fact-row"><span class="fact-label">Language</span><span class="fact-value">{{ movie.original_language|upper }}</span></div>{% endif %}
+    </div>
+
+    {% if movie.production_companies %}
+    <div class="sidebar-block">
+      <h3>Production</h3>
+      {% for co in movie.production_companies[:4] %}
+      <div class="fact-row">
+        <span class="fact-label">Studio</span>
+        <span class="fact-value">{{ co.name }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if movie.spoken_languages %}
+    <div class="sidebar-block">
+      <h3>Languages</h3>
+      {% for lang in movie.spoken_languages %}
+      <div class="fact-row">
+        <span class="fact-value">{{ lang.english_name }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </aside>
+
+</div>
+</div>
+{% endblock %}

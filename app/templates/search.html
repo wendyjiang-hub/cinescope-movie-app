@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{% if query %}Search: {{ query }}{% else %}Discover{% endif %} — Cinescope{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+
+  <div class="section-header">
+    <h1>{% if query %}Results{% else %}Discover{% endif %}</h1>
+    {% if query %}
+      <span class="sub">for "{{ query }}"</span>
+    {% else %}
+      <span class="sub">Search the full catalogue</span>
+    {% endif %}
+  </div>
+
+  {% if not query %}
+    <div style="text-align:center;padding:5rem 0;color:var(--muted);">
+      <p style="font-family:var(--ff-serif);font-style:italic;font-size:1.3rem;margin-bottom:1rem;">What are you looking for?</p>
+      <form action="/search" method="get" style="display:inline-flex;gap:.5rem;">
+        <input name="q" type="text" autofocus placeholder="Title, genre, anything…"
+          style="padding:.6rem 1rem;border:1px solid var(--border);background:transparent;font-family:var(--ff-body);font-size:.95rem;width:300px;outline:none;">
+        <button type="submit"
+          style="padding:.6rem 1.2rem;background:var(--ink);color:var(--gold);border:none;cursor:pointer;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;font-weight:500;">
+          Search
+        </button>
+      </form>
+    </div>
+
+  {% elif movies %}
+    <div class="movie-grid">
+      {% for movie in movies %}
+      <a class="card" href="/movie/{{ movie.id }}">
+        <div class="card-poster">
+          {% if movie.poster_url %}
+            <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" loading="lazy" />
+          {% else %}
+            <div class="card-no-image">?</div>
+          {% endif %}
+          {% if movie.vote_average %}<span class="card-score">{{ '%.1f'|format(movie.vote_average) }}</span>{% endif %}
+          <div class="card-overlay"><p class="card-overlay-text">{{ movie.overview }}</p></div>
+        </div>
+        <div class="card-info">
+          <p class="card-title">{{ movie.title }}</p>
+          <p class="card-meta">{{ movie.release_date[:4] if movie.release_date else '—' }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {# Pagination #}
+    {% if total_pages > 1 %}
+    <div class="pagination">
+      {% if page > 1 %}
+        <a href="/search?q={{ query|urlencode }}&page={{ page-1 }}">← Prev</a>
+      {% endif %}
+      {% set start = [page-2, 1]|max %}
+      {% set end   = [page+2, total_pages]|min %}
+      {% if start > 1 %}<a href="/search?q={{ query|urlencode }}&page=1">1</a>{% if start > 2 %}<span class="dots">…</span>{% endif %}{% endif %}
+      {% for p in range(start, end+1) %}
+        {% if p == page %}<span class="current">{{ p }}</span>
+        {% else %}<a href="/search?q={{ query|urlencode }}&page={{ p }}">{{ p }}</a>{% endif %}
+      {% endfor %}
+      {% if end < total_pages %}{% if end < total_pages-1 %}<span class="dots">…</span>{% endif %}<a href="/search?q={{ query|urlencode }}&page={{ total_pages }}">{{ total_pages }}</a>{% endif %}
+      {% if page < total_pages %}<a href="/search?q={{ query|urlencode }}&page={{ page+1 }}">Next →</a>{% endif %}
+    </div>
+    {% endif %}
+
+  {% else %}
+    <div style="text-align:center;padding:5rem 0;color:var(--muted);">
+      <p style="font-family:var(--ff-serif);font-style:italic;font-size:1.2rem;">No films found for "{{ query }}".</p>
+      <p style="margin-top:.6rem;font-size:.85rem;">Try a different title or keyword.</p>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

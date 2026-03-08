@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Cinescope — Trending Films{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+
+  <div class="section-header">
+    <h1>Trending</h1>
+    <span class="sub">What the world is watching</span>
+    <div class="toggle-pills" style="margin-left:auto;">
+      <a href="/?window=week" class="{{ 'active' if window == 'week' }}">This Week</a>
+      <a href="/?window=day"  class="{{ 'active' if window == 'day'  }}">Today</a>
+    </div>
+  </div>
+
+  {% if movies %}
+  <div class="movie-grid">
+    {% for movie in movies %}
+    <a class="card" href="/movie/{{ movie.id }}">
+      <div class="card-poster">
+        {% if movie.poster_url %}
+          <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" loading="lazy" />
+        {% else %}
+          <div class="card-no-image">?</div>
+        {% endif %}
+        {% if movie.vote_average %}
+          <span class="card-score">{{ '%.1f'|format(movie.vote_average) }}</span>
+        {% endif %}
+        <div class="card-overlay">
+          <p class="card-overlay-text">{{ movie.overview }}</p>
+        </div>
+      </div>
+      <div class="card-info">
+        <p class="card-title">{{ movie.title }}</p>
+        <p class="card-meta">
+          {{ movie.release_date[:4] if movie.release_date else '—' }}
+        </p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p style="color:var(--muted);padding:4rem 0;text-align:center;">No films found. Check your API key.</p>
+  {% endif %}
+
+  {# Pagination #}
+  {% if total_pages > 1 %}
+  <div class="pagination">
+    {% if page > 1 %}
+      <a href="/?page={{ page-1 }}&window={{ window }}">← Prev</a>
+    {% endif %}
+
+    {% set start = [page-2, 1]|max %}
+    {% set end   = [page+2, total_pages]|min %}
+
+    {% if start > 1 %}
+      <a href="/?page=1&window={{ window }}">1</a>
+      {% if start > 2 %}<span class="dots">…</span>{% endif %}
+    {% endif %}
+
+    {% for p in range(start, end+1) %}
+      {% if p == page %}
+        <span class="current">{{ p }}</span>
+      {% else %}
+        <a href="/?page={{ p }}&window={{ window }}">{{ p }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if end < total_pages %}
+      {% if end < total_pages-1 %}<span class="dots">…</span>{% endif %}
+      <a href="/?page={{ total_pages }}&window={{ window }}">{{ total_pages }}</a>
+    {% endif %}
+
+    {% if page < total_pages %}
+      <a href="/?page={{ page+1 }}&window={{ window }}">Next →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

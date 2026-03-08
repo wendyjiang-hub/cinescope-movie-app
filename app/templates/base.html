@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}CINESCOPE{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #0d0d0d;
+      --paper:     #f5f0e8;
+      --cream:     #ede7d9;
+      --gold:      #c8a96e;
+      --gold-dim:  #9a7d4e;
+      --red:       #c0392b;
+      --muted:     #7a7060;
+      --border:    rgba(13,13,13,0.12);
+      --ff-title:  'Bebas Neue', sans-serif;
+      --ff-serif:  'DM Serif Display', serif;
+      --ff-body:   'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--ff-body);
+      font-weight: 300;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--ink);
+      display: flex; align-items: center; gap: 2rem;
+      padding: 0 2.5rem;
+      height: 58px;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .nav-logo {
+      font-family: var(--ff-title);
+      font-size: 1.9rem;
+      letter-spacing: .12em;
+      color: var(--gold);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex; gap: 1.8rem; list-style: none;
+      margin-left: .5rem;
+    }
+    .nav-links a {
+      color: var(--cream); text-decoration: none;
+      font-size: .78rem; letter-spacing: .12em;
+      text-transform: uppercase; font-weight: 500;
+      opacity: .7; transition: opacity .2s, color .2s;
+    }
+    .nav-links a:hover { opacity: 1; color: var(--gold); }
+
+    /* Search */
+    .nav-search {
+      margin-left: auto;
+      display: flex; align-items: center;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .nav-search input {
+      background: transparent; border: none; outline: none;
+      color: #fff; font-family: var(--ff-body); font-size: .85rem;
+      padding: .45rem 1rem; width: 220px;
+    }
+    .nav-search input::placeholder { color: rgba(255,255,255,.4); }
+    .nav-search button {
+      background: var(--gold); border: none; cursor: pointer;
+      padding: .45rem .9rem; color: var(--ink);
+      font-size: .8rem; font-weight: 500; letter-spacing: .05em;
+      transition: background .2s;
+    }
+    .nav-search button:hover { background: #d4b87a; }
+
+    /* ── CONTENT WRAPPER ── */
+    .page-wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      display: flex; align-items: baseline; gap: 1.2rem;
+      padding: 2.8rem 0 1.8rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.4rem;
+    }
+    .section-header h1 {
+      font-family: var(--ff-title);
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      letter-spacing: .05em;
+      line-height: 1;
+    }
+    .section-header .sub {
+      font-family: var(--ff-serif);
+      font-style: italic;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    /* ── MOVIE GRID ── */
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 2rem 1.6rem;
+      padding-bottom: 4rem;
+    }
+
+    /* ── MOVIE CARD ── */
+    .card {
+      display: block; text-decoration: none; color: inherit;
+      position: relative;
+      transition: transform .3s cubic-bezier(.25,.46,.45,.94);
+    }
+    .card:hover { transform: translateY(-6px); }
+
+    .card-poster {
+      position: relative; overflow: hidden;
+      aspect-ratio: 2/3;
+      background: var(--cream);
+      border: 1px solid var(--border);
+    }
+    .card-poster img {
+      width: 100%; height: 100%; object-fit: cover;
+      display: block;
+      transition: transform .5s ease;
+    }
+    .card:hover .card-poster img { transform: scale(1.04); }
+
+    .card-no-image {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--ff-title); font-size: 3rem; color: var(--border);
+    }
+
+    /* Score badge */
+    .card-score {
+      position: absolute; top: .6rem; right: .6rem;
+      background: var(--ink); color: var(--gold);
+      font-family: var(--ff-title); font-size: 1rem; letter-spacing: .05em;
+      padding: .2rem .5rem;
+      border: 1px solid var(--gold-dim);
+    }
+
+    /* Hover overlay */
+    .card-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(13,13,13,.85) 0%, transparent 55%);
+      opacity: 0; transition: opacity .3s;
+      display: flex; align-items: flex-end; padding: .9rem;
+    }
+    .card:hover .card-overlay { opacity: 1; }
+    .card-overlay-text {
+      font-size: .75rem; color: rgba(255,255,255,.8); line-height: 1.4;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-info { padding: .7rem 0 0; }
+    .card-title {
+      font-family: var(--ff-body); font-weight: 500;
+      font-size: .9rem; line-height: 1.25;
+      margin-bottom: .2rem;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-meta { font-size: .75rem; color: var(--muted); letter-spacing: .03em; }
+
+    /* ── PAGINATION ── */
+    .pagination {
+      display: flex; justify-content: center; align-items: center;
+      gap: .5rem; padding: 1rem 0 4rem;
+    }
+    .pagination a, .pagination span {
+      display: inline-block;
+      padding: .45rem .85rem;
+      font-size: .8rem; letter-spacing: .08em; text-transform: uppercase;
+      font-weight: 500; text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--ink); background: transparent;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .pagination a:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .pagination span.current {
+      background: var(--ink); color: var(--gold);
+      border-color: var(--ink);
+    }
+    .pagination span.dots { border: none; color: var(--muted); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--ink); color: rgba(255,255,255,.35);
+      text-align: center; padding: 1.8rem;
+      font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
+      border-top: 2px solid var(--gold);
+    }
+    footer a { color: var(--gold-dim); text-decoration: none; }
+
+    /* ── TOGGLE PILLS ── */
+    .toggle-pills {
+      display: flex; gap: .5rem;
+    }
+    .toggle-pills a {
+      padding: .3rem .9rem;
+      font-size: .75rem; letter-spacing: .1em; text-transform: uppercase;
+      font-weight: 500; text-decoration: none;
+      border: 1px solid var(--border); color: var(--muted);
+      transition: all .2s;
+    }
+    .toggle-pills a.active,
+    .toggle-pills a:hover {
+      background: var(--ink); color: var(--gold); border-color: var(--ink);
+    }
+
+    /* ── UTILITIES ── */
+    .divider {
+      height: 1px; background: var(--border); margin: 0;
+    }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 1rem; gap: 1rem; }
+      .nav-links { display: none; }
+      .nav-search input { width: 140px; }
+      .page-wrap { padding: 0 1rem; }
+      .movie-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1.2rem 1rem; }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">Cinescope</a>
+  <ul class="nav-links">
+    <li><a href="/?window=week">Trending</a></li>
+    <li><a href="/?window=day">Today</a></li>
+    <li><a href="/search">Discover</a></li>
+  </ul>
+  <form class="nav-search" action="/search" method="get">
+    <input type="text" name="q" placeholder="Search films…" autocomplete="off" />
+    <button type="submit">Go</button>
+  </form>
+</nav>
+
+{% block content %}{% endblock %}
+
+<footer>
+  <p>Built with <a href="https://www.themoviedb.org/" target="_blank">TMDB</a> &nbsp;·&nbsp; Cinescope &copy; {{ 2025 }}</p>
+</footer>
+
+</body>
+</html>

@@ -3,6 +3,93 @@
 
 {% block extra_head %}
 <style>
+  /* ── INLINE CINEMA FINDER ── */
+  .inline-cinema-box {
+    background: var(--ink);
+    border: 1px solid var(--gold);
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 2.2rem;
+  }
+  .inline-cinema-header {
+    display: flex; align-items: center; gap: .9rem;
+    margin-bottom: 1rem;
+  }
+  .inline-cinema-icon { font-size: 1.6rem; flex-shrink: 0; }
+  .inline-cinema-title {
+    font-family: var(--ff-title); letter-spacing: .08em;
+    font-size: 1.15rem; color: var(--gold);
+  }
+  .inline-cinema-hint {
+    font-size: .75rem; color: rgba(255,255,255,.4);
+    margin-top: .1rem;
+  }
+  .inline-cinema-form {
+    display: flex; gap: .5rem; flex-wrap: wrap;
+  }
+  .inline-cinema-input {
+    flex: 1; min-width: 180px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(200,169,110,.4);
+    color: #fff; font-family: var(--ff-body); font-size: .88rem;
+    padding: .55rem .9rem; outline: none;
+    transition: border-color .2s;
+  }
+  .inline-cinema-input:focus { border-color: var(--gold); }
+  .inline-cinema-input::placeholder { color: rgba(255,255,255,.3); }
+  .inline-cinema-select {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(200,169,110,.4);
+    color: #fff; font-family: var(--ff-body); font-size: .85rem;
+    padding: .55rem .6rem; outline: none; cursor: pointer;
+    width: 80px;
+  }
+  .inline-cinema-select option { background: #111; }
+  .inline-cinema-btn {
+    background: var(--gold); color: var(--ink);
+    border: 2px solid var(--gold); cursor: pointer;
+    padding: .55rem 1.3rem;
+    font-family: var(--ff-body); font-size: .78rem;
+    font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    transition: background .2s, color .2s;
+  }
+  .inline-cinema-btn:hover { background: transparent; color: var(--gold); }
+
+  /* Results inside inline box */
+  #cinema-results-inline { margin-top: 1.1rem; }
+  .ic-location-label {
+    font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+    color: rgba(255,255,255,.35); margin-bottom: .8rem;
+  }
+  .ic-location-label strong { color: var(--gold); }
+  .ic-list { display: flex; flex-direction: column; gap: .5rem; }
+  .ic-card {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: .8rem; flex-wrap: wrap;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    padding: .75rem 1rem;
+    transition: border-color .2s;
+  }
+  .ic-card:hover { border-color: rgba(200,169,110,.4); }
+  .ic-card-left { display: flex; align-items: center; gap: .8rem; }
+  .ic-chain-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .ic-name { font-size: .88rem; font-weight: 500; color: #fff; }
+  .ic-meta { font-size: .72rem; color: rgba(255,255,255,.35); margin-top: .1rem; }
+  .ic-ticket {
+    display: inline-block;
+    background: transparent; color: var(--gold);
+    border: 1px solid rgba(200,169,110,.5);
+    padding: .3rem .85rem;
+    font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+    font-weight: 500; text-decoration: none; white-space: nowrap;
+    transition: background .2s, color .2s;
+  }
+  .ic-ticket:hover { background: var(--gold); color: var(--ink); }
+  .ic-none { color: rgba(255,255,255,.35); font-size: .85rem; font-style: italic; padding: .4rem 0; }
+  .ic-error { color: #e06c75; font-size: .83rem; padding: .3rem 0; }
+<style>
   /* ── HERO ── */
   .hero {
     position: relative;
@@ -240,6 +327,30 @@
         ▶ Watch Trailer
       </a>
       {% endif %}
+    </div>
+
+    {# ── CINEMA FINDER ── #}
+    <div class="inline-cinema-box">
+      <div class="inline-cinema-header">
+        <span class="inline-cinema-icon">🎟</span>
+        <div>
+          <div class="inline-cinema-title">Find Tickets Near You</div>
+          <div class="inline-cinema-hint">Enter your city or UK postcode</div>
+        </div>
+      </div>
+      <div class="inline-cinema-form">
+        <input class="inline-cinema-input" id="cinema-loc" type="text"
+          placeholder="e.g. Liverpool, L1 8JQ, Manchester…" autocomplete="off" />
+        <select class="inline-cinema-select" id="cinema-radius">
+          <option value="5">5 mi</option>
+          <option value="10">10 mi</option>
+          <option value="15" selected>15 mi</option>
+          <option value="25">25 mi</option>
+          <option value="40">40 mi</option>
+        </select>
+        <button class="inline-cinema-btn" id="cinema-btn" onclick="searchCinemas()">Search</button>
+      </div>
+      <div id="cinema-results-inline"></div>
     </div>
 
     {% if movie.overview %}
@@ -545,6 +656,65 @@
     } finally {
       btn.disabled = false;
       spinner.style.display = 'none';
+    }
+  }
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('cinema-loc');
+    if (input) {
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') searchCinemas();
+      });
+    }
+  });
+
+  async function searchCinemas() {
+    var loc = document.getElementById('cinema-loc').value.trim();
+    var radius = document.getElementById('cinema-radius').value;
+    var resultsEl = document.getElementById('cinema-results-inline');
+    var btn = document.getElementById('cinema-btn');
+
+    if (!loc) {
+      resultsEl.innerHTML = '<p class="ic-error">⚠ Please enter a city or postcode.</p>';
+      return;
+    }
+
+    btn.textContent = '…';
+    btn.disabled = true;
+    resultsEl.innerHTML = '';
+
+    try {
+      var res = await fetch('/api/cinemas?location=' + encodeURIComponent(loc) + '&radius=' + radius);
+      var data = await res.json();
+
+      if (data.error) {
+        resultsEl.innerHTML = '<p class="ic-error">⚠ ' + data.error + '</p>';
+      } else if (!data.cinemas || data.cinemas.length === 0) {
+        resultsEl.innerHTML = '<p class="ic-location-label">Near <strong>' + data.location + '</strong></p><p class="ic-none">No cinemas found within ' + radius + ' miles. Try a larger radius.</p>';
+      } else {
+        var cards = data.cinemas.map(function(c) {
+          return '<div class="ic-card">' +
+            '<div class="ic-card-left">' +
+              '<div class="ic-chain-dot" style="background:' + c.chain_colour + '"></div>' +
+              '<div>' +
+                '<div class="ic-name">' + c.name + '</div>' +
+                '<div class="ic-meta">' + c.city + ' &nbsp;·&nbsp; ' + c.distance_miles + ' miles away</div>' +
+              '</div>' +
+            '</div>' +
+            '<a class="ic-ticket" href="' + c.ticket_url + '" target="_blank" rel="noopener">Buy Tickets →</a>' +
+          '</div>';
+        }).join('');
+        resultsEl.innerHTML =
+          '<p class="ic-location-label">' + data.cinemas.length + ' cinema' + (data.cinemas.length > 1 ? 's' : '') + ' near <strong>' + data.location + '</strong></p>' +
+          '<div class="ic-list">' + cards + '</div>';
+      }
+    } catch(err) {
+      resultsEl.innerHTML = '<p class="ic-error">⚠ Network error. Please try again.</p>';
+    } finally {
+      btn.textContent = 'Search';
+      btn.disabled = false;
     }
   }
 </script>

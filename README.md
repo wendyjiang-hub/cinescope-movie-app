@@ -3,7 +3,6 @@
 A cinematic film discovery web application built with **Python**, **Flask**, and the **TMDB API**.<br>
 🌐 **Live Demo:**https://cinescope-movie-app.onrender.com/<br>
 
-
 ## Features
 
 - **Trending Films** — Browse daily or weekly trending movies powered by the TMDB API  

@@ -63,7 +63,8 @@
       text-transform: uppercase; font-weight: 500;
       opacity: .7; transition: opacity .2s, color .2s;
     }
-    .nav-links a:hover { opacity: 1; color: var(--gold); }
+    .nav-links a:hover,
+    .nav-links a.active { opacity: 1; color: var(--gold); }
 
     /* Search */
     .nav-search {
@@ -252,6 +253,12 @@
     <li><a href="/?window=week">Trending</a></li>
     <li><a href="/?window=day">Today</a></li>
     <li><a href="/search">Discover</a></li>
+    <li>
+      <a href="{{ url_for('insights') }}"
+         class="{% if request.endpoint == 'insights' %}active{% endif %}">
+        Insights
+      </a>
+    </li>
   </ul>
   <form class="nav-search" action="/search" method="get">
     <input type="text" name="q" placeholder="Search films…" autocomplete="off" />

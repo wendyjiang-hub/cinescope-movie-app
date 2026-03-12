@@ -1,6 +1,7 @@
 import os
 import sys
 from dotenv import load_dotenv
+from flask import jsonify
 load_dotenv()
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -128,6 +129,42 @@ def not_found(e):
 @app.errorhandler(500)
 def server_error(e):
     return render_template("error.html", message="Something went wrong."), 500
+
+
+@app.route('/insights')
+def insights():
+    """Analytics & scheduling insights page."""
+    genre_map = {}
+    try:
+        genres = get_genres()
+        genre_map = {str(g['id']): g['name'] for g in genres}
+    except Exception as e:
+        app.logger.error('insights: failed to load genres: %s', e)
+    return render_template('analytics.html', genre_map=genre_map)
+
+
+@app.route('/api/analytics-data')
+def analytics_data():
+    """
+    JSON endpoint consumed by the analytics dashboard.
+    Returns up to 5 pages of trending movies for richer data.
+    Query params:
+        time_window  – 'week' (default) or 'day'
+    """
+    time_window = request.args.get('time_window', 'week')
+    if time_window not in ('day', 'week'):
+        time_window = 'week'
+    movies = []
+    try:
+        for page in range(1, 6):
+            result = get_trending_movies(time_window=time_window, page=page)
+            batch = result.get('results', [])
+            if not batch:
+                break
+            movies.extend(batch)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    return jsonify({'movies': movies, 'time_window': time_window})
 
 
 if __name__ == "__main__":

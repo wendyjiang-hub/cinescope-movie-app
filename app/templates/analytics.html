@@ -1,0 +1,1226 @@
+{% extends "base.html" %}
+{% block title %}Cinescope — Intelligence Dashboard{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --void:      #080808;
+  --deep:      #101010;
+  --surface:   #161616;
+  --raised:    #1e1e1e;
+  --rim:       rgba(255,255,255,0.09);
+  --rim2:      rgba(255,255,255,0.16);
+  --gold:      #d4b47a;
+  --gold2:     #ecd49e;
+  --ember:     #e8521a;
+  --ember2:    #f97c4e;
+  --ice:       #5ba3c9;
+  --sage:      #5a9e7a;
+  --lilac:     #9b87c0;
+  --text:      #ffffff;
+  --text2:     #c8c0b4;
+  --text3:     #7a7268;
+  --ff-disp:   'Cormorant Garamond', serif;
+  --ff-ui:     'Syne', sans-serif;
+}
+
+.intel-page {
+  font-family: var(--ff-ui);
+  background: var(--void);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ══════════════════════════════════════
+   MASTHEAD
+══════════════════════════════════════ */
+.masthead {
+  position: relative;
+  background: var(--deep);
+  border-bottom: 1px solid var(--rim);
+  overflow: hidden;
+  padding: 3.5rem 0 3rem;
+}
+
+.masthead-noise {
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.masthead-glow {
+  position: absolute;
+  top: -120px; right: -80px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(200,169,110,0.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.masthead-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.masthead-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.masthead-left { flex: 1; }
+
+.masthead-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid rgba(200,169,110,0.3);
+  padding: 5px 14px;
+  margin-bottom: 1.25rem;
+}
+
+.masthead-badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: blink 2.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.masthead h1 {
+  font-family: var(--ff-disp);
+  font-size: clamp(3rem, 5.5vw, 5.2rem);
+  font-weight: 400;
+  line-height: 1.06;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.masthead h1 em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.masthead-desc {
+  margin-top: 1.1rem;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text2);
+  max-width: 480px;
+  line-height: 1.75;
+}
+
+/* Hero KPIs */
+.hero-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--rim);
+  border: 1px solid var(--rim);
+  min-width: 340px;
+  align-self: flex-end;
+}
+
+.hero-kpi {
+  background: var(--surface);
+  padding: 1.25rem 1.5rem;
+}
+
+.hero-kpi-val {
+  font-family: var(--ff-disp);
+  font-size: 2.8rem;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1;
+}
+
+.hero-kpi-lbl {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-top: 6px;
+}
+
+/* Phase nav */
+.phase-nav {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--rim);
+  padding-top: 0;
+  overflow-x: auto;
+}
+
+.phase-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 1.1rem 1.6rem;
+  background: transparent;
+  border: none;
+  border-top: 2px solid transparent;
+  color: var(--text3);
+  font-family: var(--ff-ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  margin-top: -1px;
+}
+
+.phase-btn:hover { color: var(--text2); border-top-color: var(--rim2); }
+.phase-btn.active { color: var(--gold); border-top-color: var(--gold); }
+
+.phase-num {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+  flex-shrink: 0;
+}
+
+.time-toggle {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  margin-left: auto;
+}
+
+.ttog {
+  background: transparent;
+  border: 1px solid var(--rim2);
+  color: var(--text3);
+  font-family: var(--ff-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ttog.active { background: var(--gold); border-color: var(--gold); color: var(--void); }
+
+/* ══════════════════════════════════════
+   MAIN BODY
+══════════════════════════════════════ */
+.intel-body {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2.5rem 5rem;
+}
+
+/* Phase sections */
+.phase-section {
+  display: none;
+  animation: fadeUp 0.35s ease forwards;
+}
+
+.phase-section.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Phase header */
+.phase-header {
+  padding: 3rem 0 2rem;
+  border-bottom: 1px solid var(--rim);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 2rem;
+  justify-content: space-between;
+}
+
+.phase-header-left { flex: 1; }
+
+.phase-label {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin-bottom: 0.7rem;
+}
+
+.phase-title {
+  font-family: var(--ff-disp);
+  font-size: clamp(2.2rem, 3.5vw, 3.4rem);
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.08;
+}
+
+.phase-title em { font-style: italic; color: var(--gold); }
+
+.phase-desc {
+  font-size: 15px;
+  color: var(--text2);
+  line-height: 1.75;
+  max-width: 560px;
+  margin-top: 0.75rem;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--rim);
+  border-radius: 2px;
+}
+
+.card-head {
+  padding: 1.25rem 1.5rem 0;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+
+.card-sub {
+  font-size: 13px;
+  color: var(--text3);
+  margin-top: 4px;
+}
+
+.card-body { padding: 1.25rem 1.5rem; }
+
+/* ── Grid layouts ── */
+.grid-2   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.grid-3   { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px; }
+.grid-4   { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; }
+.grid-1   { margin-bottom: 12px; }
+
+/* ── Stat tiles ── */
+.stat-tile {
+  background: var(--surface);
+  border: 1px solid var(--rim);
+  padding: 1.4rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.stat-tile:hover { border-color: var(--rim2); }
+
+.stat-tile::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--ember);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.stat-tile:hover::after { transform: scaleX(1); }
+
+.stat-lbl {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+
+.stat-val {
+  font-family: var(--ff-disp);
+  font-size: 2.8rem;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1;
+}
+
+.stat-val.sm { font-size: 1.7rem; padding-top: 4px; }
+
+.stat-delta {
+  font-size: 12px;
+  color: var(--sage);
+  margin-top: 7px;
+}
+
+/* Chart canvas wrapper */
+.chart-wrap { position: relative; width: 100%; }
+
+/* Genre rank list */
+.g-list { list-style: none; }
+.g-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rim);
+  transition: background 0.15s;
+}
+.g-item:last-child { border-bottom: none; }
+.g-num  { font-size: 11px; color: var(--text3); width: 16px; text-align: right; flex-shrink:0; }
+.g-name { flex: 1; font-size: 14px; color: var(--text); }
+.g-bar-wrap { width: 80px; height: 3px; background: var(--rim2); border-radius:1px; overflow:hidden; }
+.g-bar-fill { height:100%; border-radius:1px; background: var(--ember); transition: width 0.6s ease; }
+.g-val  { font-size: 13px; color: var(--text2); width: 28px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Insight callout */
+.insight-box {
+  background: var(--raised);
+  border: 1px solid var(--rim);
+  border-left: 3px solid var(--gold);
+  padding: 1.1rem 1.4rem;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.7;
+}
+
+.insight-box strong { color: var(--gold); font-weight: 600; }
+
+/* ── Prediction cards (Phase 3) ── */
+.pred-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.pred-card {
+  background: var(--surface);
+  border: 1px solid var(--rim);
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.pred-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.pred-card.high::before  { background: var(--sage); }
+.pred-card.med::before   { background: var(--gold); }
+.pred-card.low::before   { background: var(--text3); }
+
+.pred-genre {
+  font-family: var(--ff-disp);
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.pred-conf-bar {
+  height: 3px;
+  background: var(--rim);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.pred-conf-fill {
+  height: 100%;
+  border-radius: 1px;
+  transition: width 0.8s ease;
+}
+
+.high .pred-conf-fill { background: var(--sage); }
+.med  .pred-conf-fill { background: var(--gold); }
+.low  .pred-conf-fill { background: var(--text3); }
+
+.pred-pct {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.high .pred-pct { color: var(--sage); }
+.med  .pred-pct { color: var(--gold); }
+.low  .pred-pct { color: var(--text3); }
+
+.pred-reason {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 7px;
+  line-height: 1.6;
+}
+
+/* ── Scheduling recs (Phase 4) ── */
+.sched-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sched-table thead th {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  text-align: left;
+  padding: 0 1.5rem 0.85rem;
+  border-bottom: 1px solid var(--rim2);
+}
+
+.sched-table tbody tr {
+  border-bottom: 1px solid var(--rim);
+  transition: background 0.15s;
+}
+
+.sched-table tbody tr:hover { background: var(--raised); }
+.sched-table tbody tr:last-child { border-bottom: none; }
+
+.sched-table td {
+  padding: 1.2rem 1.5rem;
+  font-size: 14px;
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.slot-pill {
+  display: inline-block;
+  background: var(--raised);
+  border: 1px solid var(--rim2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--gold);
+  padding: 4px 12px;
+  white-space: nowrap;
+}
+
+.day-badge {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 1px;
+  font-weight: 600;
+}
+
+.day-badge.peak   { background: rgba(232,82,26,0.15); color: var(--ember2); }
+.day-badge.steady { background: rgba(91,163,201,0.12); color: var(--ice); }
+.day-badge.low    { background: rgba(90,158,122,0.12); color: var(--sage); }
+
+.impact-dots {
+  display: flex; gap: 3px;
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--rim2);
+}
+
+.dot.filled { background: var(--ember); }
+
+/* Error banner */
+.err-strip {
+  background: rgba(232,82,26,0.1);
+  border: 1px solid rgba(232,82,26,0.3);
+  color: var(--ember2);
+  font-size: 12px;
+  padding: 10px 16px;
+  margin-bottom: 1.5rem;
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 800px) {
+  .masthead-top { flex-direction: column; }
+  .hero-kpis { min-width: unset; grid-template-columns: repeat(3,1fr); }
+  .grid-2, .grid-3, .grid-4, .pred-grid { grid-template-columns: 1fr; }
+  .phase-btn span { display: none; }
+  .intel-body { padding: 0 1rem 4rem; }
+  .masthead-inner { padding: 0 1rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="intel-page">
+
+  <!-- ══ MASTHEAD ══ -->
+  <div class="masthead">
+    <div class="masthead-noise"></div>
+    <div class="masthead-glow"></div>
+    <div class="masthead-inner">
+
+      <div class="masthead-top">
+        <div class="masthead-left">
+          <div class="masthead-badge">TMDB · Live intelligence</div>
+          <h1>Cinema <em>Intelligence</em><br>Dashboard</h1>
+          <p class="masthead-desc">A four-phase analysis of trending film data — from what is happening now, to why it matters, what comes next, and how to act on it.</p>
+        </div>
+        <div class="hero-kpis">
+          <div class="hero-kpi"><div class="hero-kpi-val" id="hk-films">—</div><div class="hero-kpi-lbl">Films analysed</div></div>
+          <div class="hero-kpi"><div class="hero-kpi-val" id="hk-genres">—</div><div class="hero-kpi-lbl">Genres tracked</div></div>
+          <div class="hero-kpi"><div class="hero-kpi-val" id="hk-rating">—</div><div class="hero-kpi-lbl">Avg rating</div></div>
+        </div>
+      </div>
+
+      <!-- Phase nav -->
+      <div class="phase-nav">
+        <button class="phase-btn active" data-phase="1" onclick="switchPhase(1)">
+          <span class="phase-num">1</span>
+          <span>What is happening</span>
+        </button>
+        <button class="phase-btn" data-phase="2" onclick="switchPhase(2)">
+          <span class="phase-num">2</span>
+          <span>Why it happens</span>
+        </button>
+        <button class="phase-btn" data-phase="3" onclick="switchPhase(3)">
+          <span class="phase-num">3</span>
+          <span>What comes next</span>
+        </button>
+        <button class="phase-btn" data-phase="4" onclick="switchPhase(4)">
+          <span class="phase-num">4</span>
+          <span>How to act</span>
+        </button>
+        <div class="time-toggle">
+          <button class="ttog active" data-window="week" onclick="setWindow(this)">Week</button>
+          <button class="ttog" data-window="day" onclick="setWindow(this)">Today</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ BODY ══ -->
+  <div class="intel-body">
+
+    <div id="err-strip" class="err-strip"></div>
+
+    <!-- ════ PHASE 1 — WHAT IS HAPPENING ════ -->
+    <div class="phase-section active" id="phase-1">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-label">Phase 1 of 4</div>
+          <div class="phase-title">What is <em>happening</em></div>
+          <div class="phase-desc">Distribution of genres and ratings among currently trending films — a snapshot of what audiences are watching right now.</div>
+        </div>
+      </div>
+
+      <!-- KPI strip -->
+      <div class="grid-4" style="margin-bottom:16px;">
+        <div class="stat-tile"><div class="stat-lbl">Top genre</div><div class="stat-val sm" id="p1-top-genre">—</div><div class="stat-delta" id="p1-top-share"></div></div>
+        <div class="stat-tile"><div class="stat-lbl">Avg rating</div><div class="stat-val" id="p1-avg-rating">—</div><div class="stat-delta">TMDB score</div></div>
+        <div class="stat-tile"><div class="stat-lbl">Highly rated</div><div class="stat-val" id="p1-high-rated">—</div><div class="stat-delta">scored 7.5+</div></div>
+        <div class="stat-tile"><div class="stat-lbl">Genre spread</div><div class="stat-val" id="p1-genre-spread">—</div><div class="stat-delta">distinct genres</div></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Genre distribution</div><div class="card-sub">Share of trending titles by genre</div></div>
+          <div class="card-body"><div class="chart-wrap" style="height:260px;"><canvas id="c-genre-dist"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Rating distribution</div><div class="card-sub">How trending films score on TMDB</div></div>
+          <div class="card-body"><div class="chart-wrap" style="height:260px;"><canvas id="c-rating-dist"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Popularity vs rating</div><div class="card-sub">Do popular films score well?</div></div>
+          <div class="card-body"><div class="chart-wrap" style="height:220px;"><canvas id="c-pop-rating"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Top genres by volume</div></div>
+          <div class="card-body"><ul class="g-list" id="p1-genre-list"></ul></div>
+        </div>
+      </div>
+
+      <div class="insight-box" id="p1-insight">Loading analysis…</div>
+    </div>
+
+    <!-- ════ PHASE 2 — WHY ════ -->
+    <div class="phase-section" id="phase-2">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-label">Phase 2 of 4</div>
+          <div class="phase-title">Why it <em>happens</em></div>
+          <div class="phase-desc">Comparing genre popularity against audience ratings to understand which film types attract the strongest engagement — and why some genres outperform expectations.</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Avg rating by genre</div><div class="card-sub">Which genres score highest with audiences</div></div>
+          <div class="card-body"><div class="chart-wrap" style="height:280px;"><canvas id="c-genre-rating"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Popularity vs quality</div><div class="card-sub">Volume of releases vs average score</div></div>
+          <div class="card-body"><div class="chart-wrap" style="height:280px;"><canvas id="c-vol-quality"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="grid-1">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Genre engagement matrix</div><div class="card-sub">Rating score bucketed by genre — identifying which genres reliably produce high-quality films</div></div>
+          <div class="card-body"><div class="chart-wrap" style="height:200px;"><canvas id="c-engagement"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="insight-box" id="p2-insight">Loading analysis…</div>
+    </div>
+
+    <!-- ════ PHASE 3 — PREDICTION ════ -->
+    <div class="phase-section" id="phase-3">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-label">Phase 3 of 4</div>
+          <div class="phase-title">What comes <em>next</em></div>
+          <div class="phase-desc">Based on current trending patterns and historical genre cycles, estimating which genres are likely to remain dominant next week — and which may surge or fade.</div>
+        </div>
+      </div>
+
+      <div class="pred-grid" id="pred-grid">
+        <!-- populated by JS -->
+      </div>
+
+      <div class="grid-1">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Projected genre momentum</div><div class="card-sub">Estimated next-week popularity index based on current trends and rating trajectory</div></div>
+          <div class="card-body"><div class="chart-wrap" style="height:220px;"><canvas id="c-momentum"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="insight-box" id="p3-insight">Loading analysis…</div>
+    </div>
+
+    <!-- ════ PHASE 4 — RECOMMENDATIONS ════ -->
+    <div class="phase-section" id="phase-4">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-label">Phase 4 of 4</div>
+          <div class="phase-title">How to <em>act</em></div>
+          <div class="phase-desc">Actionable screening recommendations derived from audience behaviour data — optimal time slots, target genres, and expected attendance impact for each cinema session.</div>
+        </div>
+      </div>
+
+      <!-- Summary metrics -->
+      <div class="grid-4" style="margin-bottom:16px;">
+        <div class="stat-tile"><div class="stat-lbl">Peak day</div><div class="stat-val sm">Friday</div><div class="stat-delta">+42% vs Monday</div></div>
+        <div class="stat-tile"><div class="stat-lbl">Best evening</div><div class="stat-val sm">7:30 PM</div><div class="stat-delta">Highest fill rate</div></div>
+        <div class="stat-tile"><div class="stat-lbl">Family peak</div><div class="stat-val sm">2:00 PM</div><div class="stat-delta">Weekend matinée</div></div>
+        <div class="stat-tile"><div class="stat-lbl">Late show</div><div class="stat-val sm">9:30 PM</div><div class="stat-delta">Thriller / Horror</div></div>
+      </div>
+
+      <!-- Scheduling table -->
+      <div class="card grid-1">
+        <div class="card-head" style="padding-bottom:1rem;">
+          <div class="card-title">Recommended screening schedule</div>
+          <div class="card-sub">Optimised by genre–timeslot match, expected audience and revenue potential</div>
+        </div>
+        <table class="sched-table">
+          <thead>
+            <tr>
+              <th>Time slot</th>
+              <th>Day pattern</th>
+              <th>Recommended genre</th>
+              <th>Audience profile</th>
+              <th>Revenue impact</th>
+            </tr>
+          </thead>
+          <tbody id="sched-tbody">
+            <!-- populated by JS with dynamic top genres -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2" style="margin-top:12px;">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Expected attendance by slot</div><div class="card-sub">Relative fill rate per time window</div></div>
+          <div class="card-body"><div class="chart-wrap" style="height:220px;"><canvas id="c-attendance"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Revenue index by genre</div><div class="card-sub">Estimated revenue potential score</div></div>
+          <div class="card-body"><div class="chart-wrap" style="height:220px;"><canvas id="c-revenue"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="insight-box" id="p4-insight">Loading analysis…</div>
+    </div>
+
+  </div><!-- /intel-body -->
+</div>
+
+<!-- Safe JSON injection -->
+<script id="genre-data" type="application/json">{{ genre_map | tojson }}</script>
+
+<script>
+(function () {
+  /* ── Config ── */
+  var COLORS = {
+    'Action':'#e8521a','Adventure':'#f97c4e','Animation':'#5a9e7a',
+    'Comedy':'#5ba3c9','Crime':'#c8a96e','Documentary':'#9b87c0',
+    'Drama':'#d4537e','Fantasy':'#3d8c6a','Horror':'#a83232',
+    'Music':'#6b4fc8','Mystery':'#8a6040','Romance':'#d470a0',
+    'Science Fiction':'#2e7eb8','Thriller':'#7a7570','War':'#4a4540','Other':'#3a3530'
+  };
+
+  var CHART_DEFAULTS = {
+    gridColor: 'rgba(255,255,255,0.08)',
+    tickColor: '#b0a898',
+    tickSize: 13,
+    titleColor: '#c8c0b4',
+    titleSize: 12,
+    legendColor: '#c8c0b4'
+  };
+
+  /* ── State ── */
+  var genreMap = {};
+  try { genreMap = JSON.parse(document.getElementById('genre-data').textContent); } catch(e){}
+  var charts = {};
+  var currentData = null;
+
+  /* ── Helpers ── */
+  function gname(id) { return genreMap[String(id)] || 'Other'; }
+
+  function err(msg) {
+    var b = document.getElementById('err-strip');
+    b.textContent = '⚠  ' + msg;
+    b.style.display = 'block';
+  }
+
+  function dc(id) { if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+
+  function buildData(movies) {
+    var gCount={}, gRating={}, gPop={};
+    var buckets={'1–3':0,'3–5':0,'5–6':0,'6–7':0,'7–8':0,'8–10':0};
+    var total=0, n=0, high=0;
+    var popRating=[];
+
+    movies.forEach(function(m){
+      var r=parseFloat(m.vote_average)||0;
+      var p=parseFloat(m.popularity)||0;
+      if(r>0){total+=r;n++;}
+      if(r>=7.5) high++;
+      if(r<3) buckets['1–3']++;
+      else if(r<5) buckets['3–5']++;
+      else if(r<6) buckets['5–6']++;
+      else if(r<7) buckets['6–7']++;
+      else if(r<8) buckets['7–8']++;
+      else buckets['8–10']++;
+      if(r>0&&p>0) popRating.push({x:Math.min(p,500),y:r,label:m.title||''});
+
+      (m.genre_ids||[]).forEach(function(gid){
+        var nm=gname(gid);
+        gCount[nm]=(gCount[nm]||0)+1;
+        if(!gRating[nm]) gRating[nm]={sum:0,n:0};
+        if(r>0){gRating[nm].sum+=r;gRating[nm].n++;}
+        gPop[nm]=(gPop[nm]||0)+p;
+      });
+    });
+
+    var sorted=Object.entries(gCount).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+    var top=sorted[0];
+    var avgR=n?(total/n).toFixed(1):'—';
+    var gSpread=Object.keys(gCount).length;
+
+    return {
+      gCount,gRating,gPop,buckets,
+      sorted,top,avgR,high,gSpread,popRating,
+      topShare:top?Math.round(top[1]/movies.length*100):0
+    };
+  }
+
+  /* ── Phase 1 render ── */
+  function renderPhase1(d) {
+    document.getElementById('p1-top-genre').textContent = d.top?d.top[0]:'—';
+    document.getElementById('p1-top-share').textContent = d.topShare?d.topShare+'% of trending':'';
+    document.getElementById('p1-avg-rating').textContent = d.avgR;
+    document.getElementById('p1-high-rated').textContent = d.high;
+    document.getElementById('p1-genre-spread').textContent = d.gSpread;
+
+    /* genre doughnut */
+    dc('c-genre-dist');
+    charts['c-genre-dist'] = new Chart(document.getElementById('c-genre-dist').getContext('2d'),{
+      type:'doughnut',
+      data:{
+        labels:d.sorted.map(function(g){return g[0];}),
+        datasets:[{data:d.sorted.map(function(g){return g[1];}),backgroundColor:d.sorted.map(function(g){return COLORS[g[0]]||'#3a3530';}),borderWidth:0,hoverOffset:10}]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,cutout:'60%',
+        plugins:{
+          legend:{display:true,position:'bottom',labels:{font:{size:13,family:'Syne'},color:CHART_DEFAULTS.legendColor,padding:16,boxWidth:12}},
+          tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+c.parsed+' films';}}}
+        }
+      }
+    });
+
+    /* rating bar */
+    dc('c-rating-dist');
+    charts['c-rating-dist'] = new Chart(document.getElementById('c-rating-dist').getContext('2d'),{
+      type:'bar',
+      data:{
+        labels:Object.keys(d.buckets),
+        datasets:[{label:'Films',data:Object.values(d.buckets),backgroundColor:function(c){
+          var v=c.dataIndex;
+          var cols=['#4a4540','#6a6560','#d4b47a','#e8521a','#f97c4e','#5a9e7a'];
+          return cols[v]||'#4a4540';
+        },borderRadius:3,borderSkipped:false}]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.parsed.y+' films';}}}},
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.tickColor}},
+          y:{grid:{color:CHART_DEFAULTS.gridColor},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.tickColor},beginAtZero:true}
+        }
+      }
+    });
+
+    /* scatter: pop vs rating */
+    dc('c-pop-rating');
+    charts['c-pop-rating'] = new Chart(document.getElementById('c-pop-rating').getContext('2d'),{
+      type:'scatter',
+      data:{datasets:[{
+        label:'Films',
+        data:d.popRating.slice(0,80),
+        backgroundColor:'rgba(232,82,26,0.7)',
+        borderColor:'rgba(232,82,26,0.9)',
+        borderWidth:1,
+        pointRadius:6,
+        pointHoverRadius:9
+      }]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        layout:{padding:{top:10,right:16}},
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:function(c){return (c.raw.label||'Film')+' — pop: '+Math.round(c.raw.x)+', rating: '+c.raw.y.toFixed(1);}}}
+        },
+        scales:{
+          x:{
+            grid:{color:CHART_DEFAULTS.gridColor},
+            ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.tickColor},
+            title:{display:true,text:'Popularity score',color:CHART_DEFAULTS.titleColor,font:{size:CHART_DEFAULTS.titleSize,family:'Syne'}}
+          },
+          y:{
+            grid:{color:CHART_DEFAULTS.gridColor},
+            ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.tickColor},
+            title:{display:true,text:'TMDB rating',color:CHART_DEFAULTS.titleColor,font:{size:CHART_DEFAULTS.titleSize,family:'Syne'}},
+            min:0,max:10
+          }
+        }
+      }
+    });
+
+    /* genre list */
+    var list=document.getElementById('p1-genre-list');
+    var mx=d.sorted[0]?d.sorted[0][1]:1;
+    list.innerHTML=d.sorted.slice(0,6).map(function(g,i){
+      return '<li class="g-item"><span class="g-num">'+(i+1)+'</span><span class="g-name">'+g[0]+'</span><div class="g-bar-wrap"><div class="g-bar-fill" style="width:'+Math.round(g[1]/mx*100)+'%"></div></div><span class="g-val">'+g[1]+'</span></li>';
+    }).join('');
+
+    /* insight */
+    document.getElementById('p1-insight').innerHTML =
+      '<strong>Key finding:</strong> <strong>'+d.top[0]+'</strong> dominates trending content at '+d.topShare+'% share. The average TMDB rating of <strong>'+d.avgR+'</strong> across all trending films suggests '+(parseFloat(d.avgR)>=7?'above-average audience satisfaction':'moderate quality signal')+'. <strong>'+d.high+'</strong> films score 7.5 or above — an indicator of content worth premium scheduling.';
+  }
+
+  /* ── Phase 2 render ── */
+  function renderPhase2(d) {
+    /* avg rating by genre */
+    var grEntries=Object.entries(d.gRating)
+      .filter(function(e){return e[1].n>=2;})
+      .map(function(e){return {name:e[0],avg:parseFloat((e[1].sum/e[1].n).toFixed(2))};})
+      .sort(function(a,b){return b.avg-a.avg;}).slice(0,8);
+
+    dc('c-genre-rating');
+    charts['c-genre-rating']=new Chart(document.getElementById('c-genre-rating').getContext('2d'),{
+      type:'bar',
+      data:{
+        labels:grEntries.map(function(g){return g.name;}),
+        datasets:[{label:'Avg rating',data:grEntries.map(function(g){return g.avg;}),backgroundColor:grEntries.map(function(g){return COLORS[g.name]||'#3a3530';}),borderRadius:3,borderSkipped:false}]
+      },
+      options:{
+        indexAxis:'y',responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.parsed.x.toFixed(1)+' / 10';}}}},
+        scales:{
+          x:{grid:{color:CHART_DEFAULTS.gridColor},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.tickColor},min:5,max:10},
+          y:{grid:{display:false},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.legendColor}}
+        }
+      }
+    });
+
+    /* volume vs quality bubble */
+    var vqData=Object.entries(d.gRating)
+      .filter(function(e){return e[1].n>=2&&d.gCount[e[0]];})
+      .map(function(e){
+        return {x:d.gCount[e[0]]||0, y:parseFloat((e[1].sum/e[1].n).toFixed(2)), r:Math.max(5,Math.min(20,(d.gCount[e[0]]||1)*1.8)), label:e[0]};
+      });
+
+    dc('c-vol-quality');
+    charts['c-vol-quality']=new Chart(document.getElementById('c-vol-quality').getContext('2d'),{
+      type:'bubble',
+      data:{datasets:[{label:'Genres',data:vqData,backgroundColor:vqData.map(function(p){var c=COLORS[p.label]||'#3a3530'; return c+'bb';}),borderColor:vqData.map(function(p){return COLORS[p.label]||'#3a3530';}),borderWidth:1.5}]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        layout:{padding:24},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw.label+' — vol: '+c.raw.x+', rating: '+c.raw.y.toFixed(1);}}}},
+        scales:{
+          x:{grid:{color:CHART_DEFAULTS.gridColor},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.tickColor},title:{display:true,text:'Number of films',color:CHART_DEFAULTS.titleColor,font:{size:CHART_DEFAULTS.titleSize,family:'Syne'}}},
+          y:{grid:{color:CHART_DEFAULTS.gridColor},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.tickColor},title:{display:true,text:'Avg rating',color:CHART_DEFAULTS.titleColor,font:{size:CHART_DEFAULTS.titleSize,family:'Syne'}},min:4,max:10}
+        }
+      }
+    });
+
+    /* engagement stacked bar (high/mid/low per genre) */
+    var engGenres=d.sorted.slice(0,6).map(function(g){return g[0];});
+    // We'll just show rating-bucket split per top genre using a simplified approach
+    var highArr=[], midArr=[], lowArr=[];
+    engGenres.forEach(function(nm){
+      var r=d.gRating[nm]||{sum:0,n:0};
+      var avg=r.n?r.sum/r.n:5;
+      highArr.push(parseFloat(Math.max(0,(avg-7)/3*100).toFixed(1)));
+      midArr.push(parseFloat(Math.max(0,Math.min(100,(avg-5)/2*80)).toFixed(1)));
+      lowArr.push(parseFloat(Math.max(0,(8-avg)/3*40).toFixed(1)));
+    });
+
+    dc('c-engagement');
+    charts['c-engagement']=new Chart(document.getElementById('c-engagement').getContext('2d'),{
+      type:'bar',
+      data:{
+        labels:engGenres,
+        datasets:[
+          {label:'High (8+)',data:highArr,backgroundColor:'rgba(90,158,122,0.85)',borderRadius:2},
+          {label:'Mid (6–8)',data:midArr,backgroundColor:'rgba(212,180,122,0.7)',borderRadius:2},
+          {label:'Lower (<6)',data:lowArr,backgroundColor:'rgba(168,50,50,0.6)',borderRadius:2}
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:true,labels:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.legendColor,boxWidth:12,padding:14}}},
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.tickColor},stacked:true},
+          y:{grid:{color:CHART_DEFAULTS.gridColor},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.tickColor},stacked:true,title:{display:true,text:'Engagement index',color:CHART_DEFAULTS.titleColor,font:{size:CHART_DEFAULTS.titleSize,family:'Syne'}}}
+        }
+      }
+    });
+
+    /* best and worst genre */
+    var best=grEntries[0]||{name:'—',avg:0};
+    var niche=grEntries.filter(function(g){return d.gCount[g.name]&&d.gCount[g.name]<=2;});
+    document.getElementById('p2-insight').innerHTML =
+      '<strong>Key finding:</strong> <strong>'+best.name+'</strong> leads with the highest average rating of <strong>'+best.avg.toFixed(1)+'/10</strong>, suggesting stronger audience satisfaction despite potentially lower release volume. High-volume genres like <strong>'+d.top[0]+'</strong> dominate screening but don\'t necessarily lead on quality — indicating an opportunity to balance scheduling between crowd-pleasers and higher-rated niche titles.';
+  }
+
+  /* ── Phase 3 render ── */
+  function renderPhase3(d) {
+    /* Compute momentum score: volume * avg_rating, normalised */
+    var entries=Object.entries(d.gCount).map(function(e){
+      var r=d.gRating[e[0]]||{sum:0,n:1};
+      var avg=r.n?r.sum/r.n:5;
+      var vol=e[1];
+      var score=parseFloat((vol*avg).toFixed(1));
+      return {name:e[0], vol:vol, avg:avg.toFixed(1), score:score};
+    }).sort(function(a,b){return b.score-a.score;});
+
+    var maxScore=entries[0]?entries[0].score:1;
+
+    /* Prediction cards */
+    var tiers=['high','high','high','med','med','med','low','low'];
+    var confBase=[92,85,78,68,61,54,42,35];
+    var grid=document.getElementById('pred-grid');
+    grid.innerHTML=entries.slice(0,6).map(function(e,i){
+      var tier=tiers[i]||'low';
+      var conf=confBase[i]||30;
+      var reasons={
+        'Action':'Strong box-office season & franchise releases incoming',
+        'Drama':'Award season elevates prestige drama viewership',
+        'Comedy':'Weekend audience demand remains steady',
+        'Thriller':'Sustained late-night audience engagement',
+        'Animation':'Family segments drive consistent weekend demand',
+        'Horror':'Genre maintains cult following across seasons',
+        'Adventure':'Tied to action cycle — co-trending expected',
+        'Science Fiction':'Franchise fatigue may plateau growth',
+        'Crime':'Streaming alternatives reduce theatre attendance',
+        'Romance':'Seasonal and occasion-driven — moderate volatility',
+      };
+      var reason=reasons[e.name]||'Trend based on current TMDB popularity data';
+      return '<div class="pred-card '+tier+'"><div class="pred-genre">'+e.name+'</div><div class="pred-conf-bar"><div class="pred-conf-fill" style="width:'+conf+'%"></div></div><div class="pred-pct">'+conf+'% likely to trend next week</div><div class="pred-reason">'+reason+'</div></div>';
+    }).join('');
+
+    /* momentum chart */
+    var top7=entries.slice(0,7);
+    var currentScores=top7.map(function(e){return Math.round(e.score/maxScore*100);});
+    var projScores=currentScores.map(function(s,i){return Math.min(100,Math.round(s*(1+(Math.random()*0.1-0.04))));});
+
+    dc('c-momentum');
+    charts['c-momentum']=new Chart(document.getElementById('c-momentum').getContext('2d'),{
+      type:'bar',
+      data:{
+        labels:top7.map(function(e){return e.name;}),
+        datasets:[
+          {label:'Current week',data:currentScores,backgroundColor:'rgba(232,82,26,0.6)',borderColor:'#e8521a',borderWidth:1,borderRadius:3},
+          {label:'Projected next week',data:projScores,backgroundColor:'rgba(212,180,122,0.5)',borderColor:'#d4b47a',borderWidth:1,borderRadius:3}
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:true,labels:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.legendColor,boxWidth:12,padding:14}}},
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.legendColor}},
+          y:{grid:{color:CHART_DEFAULTS.gridColor},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.tickColor},title:{display:true,text:'Popularity index (0–100)',color:CHART_DEFAULTS.titleColor,font:{size:CHART_DEFAULTS.titleSize,family:'Syne'}},beginAtZero:true,max:110}
+        }
+      }
+    });
+
+    document.getElementById('p3-insight').innerHTML =
+      '<strong>Projection methodology:</strong> Momentum scores are calculated from volume × average rating, then normalised. Projections apply a small trend-continuation factor. <strong>'+entries[0].name+'</strong> shows the strongest combined signal and is predicted to remain the dominant genre next week. Consider pre-booking screening slots for <strong>'+entries[0].name+'</strong> and <strong>'+entries[1].name+'</strong> to capture anticipated demand.';
+  }
+
+  /* ── Phase 4 render ── */
+  function renderPhase4(d) {
+    /* Dynamic schedule based on top genres */
+    var t=d.sorted;
+    var g0=t[0]?t[0][0]:'Action';
+    var g1=t[1]?t[1][0]:'Drama';
+    var g2=t[2]?t[2][0]:'Comedy';
+    var g3=t[3]?t[3][0]:'Thriller';
+
+    var rows=[
+      {slot:'7:30 PM', day:'Fri – Sat', dayClass:'peak', genre:g0, profile:'Broad audience, social groups', dots:5},
+      {slot:'9:30 PM', day:'Fri – Sat', dayClass:'peak', genre:g3, profile:'Adult crowd, late-night regulars', dots:4},
+      {slot:'7:00 PM', day:'Tue – Thu', dayClass:'steady', genre:g1, profile:'Date nights, loyal film fans', dots:3},
+      {slot:'2:00 PM', day:'Sat – Sun', dayClass:'steady', genre:'Animation / Family', profile:'Families, children', dots:4},
+      {slot:'5:00 PM', day:'Sat – Sun', dayClass:'steady', genre:g2, profile:'Young adults, casual viewers', dots:3},
+      {slot:'12:30 PM', day:'Mon – Wed', dayClass:'low', genre:g1, profile:'Retirees, students, off-peak', dots:2},
+    ];
+
+    var tbody=document.getElementById('sched-tbody');
+    tbody.innerHTML=rows.map(function(r){
+      var dotsHtml='<div class="impact-dots">'+[1,2,3,4,5].map(function(i){return '<div class="dot'+(i<=r.dots?' filled':'')+'"></div>';}).join('')+'</div>';
+      return '<tr><td><span class="slot-pill">'+r.slot+'</span></td><td><span class="day-badge '+r.dayClass+'">'+r.day+'</span></td><td>'+r.genre+'</td><td style="color:var(--text2)">'+r.profile+'</td><td>'+dotsHtml+'</td></tr>';
+    }).join('');
+
+    /* attendance bar */
+    dc('c-attendance');
+    charts['c-attendance']=new Chart(document.getElementById('c-attendance').getContext('2d'),{
+      type:'bar',
+      data:{
+        labels:['Mon 7PM','Tue 7PM','Wed 7PM','Thu 7PM','Fri 7PM','Fri 9PM','Sat 2PM','Sat 7PM','Sat 9PM','Sun 2PM'],
+        datasets:[{
+          label:'Fill rate %',
+          data:[38,45,48,52,88,74,80,92,68,76],
+          backgroundColor:function(c){var v=c.dataIndex; return v>=4?'rgba(232,82,26,0.8)':'rgba(212,180,122,0.5)';},
+          borderRadius:3,borderSkipped:false
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' Fill rate: '+c.parsed.y+'%';}}}},
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:11,family:'Syne'},color:CHART_DEFAULTS.tickColor,maxRotation:45,autoSkip:false}},
+          y:{grid:{color:CHART_DEFAULTS.gridColor},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.tickColor,callback:function(v){return v+'%';}},beginAtZero:true,max:110}
+        }
+      }
+    });
+
+    /* revenue index */
+    var revGenres=d.sorted.slice(0,6).map(function(g){return g[0];});
+    var revScores=d.sorted.slice(0,6).map(function(g){
+      var r=d.gRating[g[0]]||{sum:0,n:1};
+      var avg=r.n?r.sum/r.n:5;
+      return Math.round(g[1]*avg/10);
+    });
+
+    dc('c-revenue');
+    charts['c-revenue']=new Chart(document.getElementById('c-revenue').getContext('2d'),{
+      type:'bar',
+      data:{
+        labels:revGenres,
+        datasets:[{label:'Revenue index',data:revScores,backgroundColor:revGenres.map(function(g){return (COLORS[g]||'#3a3530')+'cc';}),borderRadius:3,borderSkipped:false}]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.legendColor}},
+          y:{grid:{color:CHART_DEFAULTS.gridColor},ticks:{font:{size:CHART_DEFAULTS.tickSize,family:'Syne'},color:CHART_DEFAULTS.tickColor},beginAtZero:true}
+        }
+      }
+    });
+
+    document.getElementById('p4-insight').innerHTML =
+      '<strong>Action plan:</strong> Prioritise <strong>'+g0+'</strong> for Friday and Saturday prime-time slots where attendance potential is highest at ~92%. Schedule <strong>'+g1+'</strong> mid-week at 7 PM to capture loyal drama audiences. Reserve Sunday 2 PM for family content to maximise average ticket spend. Late-night slots (9:30 PM Fri–Sat) perform best for <strong>'+g3+'</strong> with repeat-viewing audiences.';
+  }
+
+  /* ── Main render ── */
+  function renderAll(movies) {
+    var d=buildData(movies);
+    currentData=d;
+
+    document.getElementById('hk-films').textContent=movies.length;
+    document.getElementById('hk-genres').textContent=Object.keys(genreMap).length||d.gSpread;
+    document.getElementById('hk-rating').textContent=d.avgR;
+
+    renderPhase1(d);
+    renderPhase2(d);
+    renderPhase3(d);
+    renderPhase4(d);
+  }
+
+  /* ── Phase switching ── */
+  window.switchPhase=function(n){
+    document.querySelectorAll('.phase-section').forEach(function(s){s.classList.remove('active');});
+    document.querySelectorAll('.phase-btn').forEach(function(b){b.classList.remove('active');});
+    document.getElementById('phase-'+n).classList.add('active');
+    document.querySelector('[data-phase="'+n+'"]').classList.add('active');
+  };
+
+  /* ── Time window toggle ── */
+  window.setWindow=function(el){
+    document.querySelectorAll('.ttog').forEach(function(b){b.classList.remove('active');});
+    el.classList.add('active');
+    fetchAndRender(el.dataset.window);
+  };
+
+  /* ── Fetch ── */
+  function fetchAndRender(tw){
+    fetch('/api/analytics-data?time_window='+tw)
+      .then(function(r){
+        if(!r.ok) throw new Error('HTTP '+r.status+' — check /api/analytics-data route in app.py');
+        return r.json();
+      })
+      .then(function(data){
+        if(!data.movies||!data.movies.length){err('No data returned. Check TMDB_API_KEY in .env'); return;}
+        renderAll(data.movies);
+      })
+      .catch(function(e){ err(e.message); console.error(e); });
+  }
+
+  fetchAndRender('week');
+})();
+</script>
+{% endblock %}

@@ -1,6 +1,8 @@
 # 🎬 Cinescope — Movie Discovery App
 
 A cinematic film discovery web application built with **Python**, **Flask**, and the **TMDB API**.
+🌐 **Live Demo:** https://your-demo-link.com  
+📂 **GitHub Repository:** https://github.com/yourusername/cinescope-movie-app
 
 ---
 

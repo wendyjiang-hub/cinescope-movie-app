@@ -6,16 +6,19 @@ A cinematic film discovery web application built with **Python**, **Flask**, and
 
 ## Features
 
-- **Trending Films** — Browse weekly or daily trending movies
-- **Film Detail Pages** — Full synopsis, cast, ratings, trailers, budget, and more
-- **Search** — Full-text movie search with pagination
-- **Similar Movies** — Discover related films from any detail page
-- **Responsive Design** — Works on desktop and mobile
-- - Cinema Intelligence analytics dashboard
-- Genre popularity and rating analysis
-- Predictive trend insights for next week
-- Cinema scheduling recommendations
+- **Trending Films** — Browse daily or weekly trending movies powered by the TMDB API  
+- **Film Detail Pages** — View full movie information including synopsis, cast, ratings, trailers, and budget  
+- **Search** — Full-text movie search with paginated results  
+- **Similar Movies** — Discover related films from any movie detail page  
+- **Responsive Design** — Optimized layout for both desktop and mobile devices  
 
+### Cinema Intelligence Dashboard
+
+- **Genre Popularity Analysis** — Visualise the distribution of trending film genres  
+- **Rating Distribution Insights** — Understand how trending films are rated by audiences  
+- **Popularity vs Quality Analysis** — Compare genre popularity with audience ratings  
+- **Trend Prediction** — Estimate which genres are likely to trend next week  
+- **Scheduling Recommendations** — Data-driven cinema screening suggestions based on audience behaviour
 ---
 
 ## Project Structure

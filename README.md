@@ -11,30 +11,43 @@ A cinematic film discovery web application built with **Python**, **Flask**, and
 - **Search** — Full-text movie search with pagination
 - **Similar Movies** — Discover related films from any detail page
 - **Responsive Design** — Works on desktop and mobile
+- - Cinema Intelligence analytics dashboard
+- Genre popularity and rating analysis
+- Predictive trend insights for next week
+- Cinema scheduling recommendations
 
 ---
 
 ## Project Structure
 
 ```
+## Project Structure
+
 movie-app/
 ├── app/
-│   ├── app.py                  # Flask application & routes
+│   ├── app.py                     # Flask application and routes
 │   ├── templates/
-│   │   ├── base.html           # Shared layout + nav
-│   │   ├── index.html          # Trending movies grid
-│   │   ├── movie.html          # Film detail page
-│   │   ├── search.html         # Search results
-│   │   └── error.html          # Error page
+│   │   ├── base.html              # Shared layout and navigation
+│   │   ├── index.html             # Trending movies page
+│   │   ├── movie.html             # Movie detail page
+│   │   ├── search.html            # Search results page
+│   │   ├── analytics.html         # Cinema Intelligence Dashboard
+│   │   └── error.html             # Error page
+│   │
 │   └── services/
-│       └── tmdb_api.py         # TMDB API wrapper
+│       ├── __init__.py
+│       ├── tmdb_api.py            # TMDB API integration
+│       └── cinemas.py             # Cinema scheduling / analytics logic
+│
 ├── data/
-│   ├── u.data                  # MovieLens rating data (optional)
-│   └── u.item                  # MovieLens item data (optional)
+│   ├── u.data                     # MovieLens ratings dataset (optional)
+│   └── u.item                     # MovieLens movie metadata (optional)
+│
 ├── notebooks/
-│   └── exploration.ipynb       # Data exploration notebook
-├── requirements.txt
-├── .env.example
+│   └── exploration.ipynb          # Data exploration and analysis
+│
+├── requirements.txt               # Python dependencies
+├── .gitignore
 └── README.md
 ```
 

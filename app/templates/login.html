@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Login — Cinescope{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <div style="max-width:480px;margin:60px auto 80px;">
+
+    <div style="margin-bottom:2rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
+      <h1 style="font-family:var(--ff-title);font-size:2.8rem;letter-spacing:.06em;line-height:1;">
+        Welcome Back
+      </h1>
+      <p style="color:var(--muted);font-size:.85rem;margin-top:.4rem;">
+        Log in to access your watchlist and saved films.
+      </p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div style="padding:.75rem 1rem;margin-bottom:1.2rem;
+                    border-left:3px solid {{ '#c0392b' if cat=='danger' else '#c8a96e' }};
+                    background:{{ 'rgba(192,57,43,.07)' if cat=='danger' else 'rgba(200,169,110,.07)' }};
+                    color:{{ '#c0392b' if cat=='danger' else '#9a7d4e' }};
+                    font-size:.85rem;">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" style="display:flex;flex-direction:column;gap:1.2rem;">
+
+      <div>
+        <label style="display:block;font-size:.72rem;letter-spacing:.12em;
+                      text-transform:uppercase;margin-bottom:.4rem;color:var(--muted);">
+          Email
+        </label>
+        <input type="email" name="email" required autocomplete="email"
+          style="width:100%;background:var(--cream);border:1px solid var(--border);
+                 padding:.65rem .9rem;font-family:var(--ff-body);font-size:.9rem;
+                 outline:none;transition:border-color .2s;color:var(--ink);"
+          onfocus="this.style.borderColor='var(--gold)'"
+          onblur="this.style.borderColor='var(--border)'">
+      </div>
+
+      <div>
+        <label style="display:block;font-size:.72rem;letter-spacing:.12em;
+                      text-transform:uppercase;margin-bottom:.4rem;color:var(--muted);">
+          Password
+        </label>
+        <input type="password" name="password" required autocomplete="current-password"
+          style="width:100%;background:var(--cream);border:1px solid var(--border);
+                 padding:.65rem .9rem;font-family:var(--ff-body);font-size:.9rem;
+                 outline:none;transition:border-color .2s;color:var(--ink);"
+          onfocus="this.style.borderColor='var(--gold)'"
+          onblur="this.style.borderColor='var(--border)'">
+      </div>
+
+      <div style="display:flex;align-items:center;gap:.6rem;">
+        <input type="checkbox" name="remember" id="remember"
+          style="width:15px;height:15px;accent-color:var(--gold);cursor:pointer;">
+        <label for="remember"
+          style="font-size:.8rem;color:var(--muted);cursor:pointer;">
+          Remember me
+        </label>
+      </div>
+
+      <button type="submit"
+        style="width:100%;background:var(--ink);color:var(--gold);
+               border:2px solid var(--ink);padding:.75rem;
+               font-family:var(--ff-body);font-size:.78rem;
+               letter-spacing:.14em;text-transform:uppercase;font-weight:600;
+               cursor:pointer;transition:background .2s,color .2s;margin-top:.4rem;"
+        onmouseover="this.style.background='transparent';this.style.color='var(--ink)'"
+        onmouseout="this.style.background='var(--ink)';this.style.color='var(--gold)'">
+        Log In
+      </button>
+
+    </form>
+
+    <p style="margin-top:1.5rem;text-align:center;font-size:.83rem;color:var(--muted);">
+      New here?
+      <a href="{{ url_for('register') }}"
+         style="color:var(--gold);text-decoration:none;font-weight:500;">
+        Create an account
+      </a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}

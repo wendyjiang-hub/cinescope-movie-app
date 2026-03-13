@@ -259,6 +259,13 @@
         Insights
       </a>
     </li>
+    {% if current_user.is_authenticated %}
+      <li><a href="{{ url_for('watchlist') }}">My Watchlist</a></li>
+      <li><a href="{{ url_for('logout') }}">Logout ({{ current_user.username }})</a></li>
+    {% else %}
+      <li><a href="{{ url_for('login') }}">Login</a></li>
+      <li><a href="{{ url_for('register') }}">Register</a></li>
+    {% endif %}
   </ul>
   <form class="nav-search" action="/search" method="get">
     <input type="text" name="q" placeholder="Search films…" autocomplete="off" />

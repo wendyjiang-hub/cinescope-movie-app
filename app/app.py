@@ -1,27 +1,44 @@
-import os
-import sys
+import os, sys, traceback
+from datetime import datetime
 from dotenv import load_dotenv
-from flask import jsonify
 load_dotenv()
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from flask import Flask, render_template, request, abort, jsonify
-from services.tmdb_api import (
-    get_trending_movies,
-    get_movie_details,
-    search_movies,
-    get_genres,
-)
+from flask import Flask, render_template, request, abort, jsonify, redirect, url_for, flash
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+
+from models import db, User, WatchlistItem
+from services.tmdb_api import get_trending_movies, get_movie_details, search_movies, get_genres
 from services.cinemas import find_nearby_cinemas
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 
+# ── Config ────────────────────────────────────────────────────────────────────
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", f"sqlite:///{BASE_DIR}/cinescope.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+# ── Extensions ────────────────────────────────────────────────────────────────
+db.init_app(app)
+
+login_manager = LoginManager(app)
+login_manager.login_view = "login"
+login_manager.login_message_category = "info"
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
+
+# Create tables on first run
+with app.app_context():
+    db.create_all()
+
+
+# ── Context processor ─────────────────────────────────────────────────────────
 @app.context_processor
 def inject_globals():
-    from datetime import datetime
     genres = []
     try:
         genres = get_genres()
@@ -30,6 +47,7 @@ def inject_globals():
     return {"genres": genres, "now": datetime.utcnow, "datetime": datetime}
 
 
+# ── Main routes ───────────────────────────────────────────────────────────────
 @app.route("/")
 def index():
     page = request.args.get("page", 1, type=int)
@@ -51,7 +69,7 @@ def index():
 
 @app.route("/movie/<int:movie_id>")
 def movie_detail(movie_id):
-    from datetime import datetime, date
+    from datetime import date
     try:
         movie = get_movie_details(movie_id)
     except Exception:
@@ -97,8 +115,6 @@ def search():
 
 @app.route("/api/cinemas")
 def api_cinemas():
-    """GET /api/cinemas?location=Liverpool&radius=15"""
-    import traceback
     location = request.args.get("location", "").strip()
     radius = request.args.get("radius", 15, type=float)
 
@@ -121,19 +137,8 @@ def api_cinemas():
     return jsonify({"location": display, "cinemas": cinemas})
 
 
-@app.errorhandler(404)
-def not_found(e):
-    return render_template("error.html", message="Page not found."), 404
-
-
-@app.errorhandler(500)
-def server_error(e):
-    return render_template("error.html", message="Something went wrong."), 500
-
-
 @app.route('/insights')
 def insights():
-    """Analytics & scheduling insights page."""
     genre_map = {}
     try:
         genres = get_genres()
@@ -145,12 +150,6 @@ def insights():
 
 @app.route('/api/analytics-data')
 def analytics_data():
-    """
-    JSON endpoint consumed by the analytics dashboard.
-    Returns up to 5 pages of trending movies for richer data.
-    Query params:
-        time_window  – 'week' (default) or 'day'
-    """
     time_window = request.args.get('time_window', 'week')
     if time_window not in ('day', 'week'):
         time_window = 'week'
@@ -167,7 +166,139 @@ def analytics_data():
     return jsonify({'movies': movies, 'time_window': time_window})
 
 
+# ── Auth routes ───────────────────────────────────────────────────────────────
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+    if request.method == "POST":
+        email    = request.form.get("email", "").strip().lower()
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        confirm  = request.form.get("confirm_password", "")
+
+        error = None
+        if not email or not username or not password:
+            error = "All fields are required."
+        elif password != confirm:
+            error = "Passwords do not match."
+        elif len(password) < 8:
+            error = "Password must be at least 8 characters."
+        elif User.query.filter_by(email=email).first():
+            error = "An account with that email already exists."
+        elif User.query.filter_by(username=username).first():
+            error = "That username is already taken."
+
+        if error:
+            flash(error, "danger")
+            return render_template("register.html")
+
+        user = User(email=email, username=username)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        login_user(user)
+        flash("Welcome to Cinescope!", "success")
+        return redirect(url_for("index"))
+
+    return render_template("register.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+    if request.method == "POST":
+        email    = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        user     = User.query.filter_by(email=email).first()
+
+        if user and user.check_password(password):
+            login_user(user, remember=request.form.get("remember") == "on")
+            next_page = request.args.get("next")
+            return redirect(next_page or url_for("index"))
+
+        flash("Invalid email or password.", "danger")
+
+    return render_template("login.html")
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("You've been logged out.", "info")
+    return redirect(url_for("index"))
+
+
+# ── Watchlist routes ──────────────────────────────────────────────────────────
+@app.route("/watchlist")
+@login_required
+def watchlist():
+    items = current_user.watchlist.order_by(WatchlistItem.added_at.desc()).all()
+    return render_template("watchlist.html", items=items)
+
+
+@app.route("/api/watchlist/toggle", methods=["POST"])
+@login_required
+def watchlist_toggle():
+    data = request.get_json(silent=True) or {}
+    tmdb_id = data.get("tmdb_id")
+    if not tmdb_id:
+        return jsonify({"error": "tmdb_id required"}), 400
+
+    existing = WatchlistItem.query.filter_by(
+        user_id=current_user.id, tmdb_id=tmdb_id
+    ).first()
+
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
+        return jsonify({"status": "removed", "tmdb_id": tmdb_id})
+
+    try:
+        movie = get_movie_details(int(tmdb_id))
+    except Exception:
+        return jsonify({"error": "Could not fetch movie details"}), 502
+
+    item = WatchlistItem(
+        user_id      = current_user.id,
+        tmdb_id      = tmdb_id,
+        title        = movie.get("title", "Unknown"),
+        poster_path  = movie.get("poster_path"),
+        release_date = movie.get("release_date"),
+        vote_average = movie.get("vote_average"),
+    )
+    db.session.add(item)
+    db.session.commit()
+    return jsonify({"status": "added", "tmdb_id": tmdb_id})
+
+
+@app.route("/api/watchlist/status")
+@login_required
+def watchlist_status():
+    tmdb_id = request.args.get("tmdb_id", type=int)
+    if not tmdb_id:
+        return jsonify({"error": "tmdb_id required"}), 400
+    exists = WatchlistItem.query.filter_by(
+        user_id=current_user.id, tmdb_id=tmdb_id
+    ).first() is not None
+    return jsonify({"in_watchlist": exists, "tmdb_id": tmdb_id})
+
+
+# ── Error handlers ────────────────────────────────────────────────────────────
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("error.html", message="Page not found."), 404
+
+
+@app.errorhandler(500)
+def server_error(e):
+    return render_template("error.html", message="Something went wrong."), 500
+
+
+# ── Entry point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    debug = os.environ.get("FLASK_DEBUG", "true").lower() == "true"
     app.run(host="0.0.0.0", port=port, debug=debug)

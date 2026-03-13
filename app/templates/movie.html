@@ -75,6 +75,7 @@
     padding: 1.2rem 0 1.8rem;
     border-bottom: 1px solid var(--border);
     margin-bottom: 1.8rem;
+    flex-wrap: wrap;
   }
   .score-big {
     font-family: var(--ff-title);
@@ -85,8 +86,13 @@
   .star-bar { display: flex; gap: 3px; margin-bottom: .25rem; }
   .star { color: var(--gold-dim); font-size: 1.1rem; }
   .star.on { color: var(--gold); }
-  .trailer-btn {
+
+  /* Action buttons (trailer + watchlist) */
+  .score-actions {
     margin-left: auto;
+    display: flex; gap: .75rem; align-items: center; flex-wrap: wrap;
+  }
+  .trailer-btn {
     display: inline-flex; align-items: center; gap: .55rem;
     background: var(--red); color: #fff;
     padding: .6rem 1.3rem; text-decoration: none;
@@ -94,6 +100,26 @@
     border: 2px solid var(--red); transition: background .2s, color .2s;
   }
   .trailer-btn:hover { background: transparent; color: var(--red); }
+
+  /* Watchlist button */
+  .wl-btn {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: transparent;
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    padding: .6rem 1.3rem;
+    font-family: var(--ff-body);
+    font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .2s, color .2s, border-color .2s;
+  }
+  .wl-btn:hover,
+  .wl-btn.active {
+    background: var(--gold);
+    color: var(--ink);
+  }
+  .wl-btn:disabled { opacity: .5; cursor: not-allowed; }
 
   /* ── CINEMA FINDER BOX ── */
   .cinema-box {
@@ -210,7 +236,6 @@
   }
 
   /* sidebar */
-  .detail-sidebar {}
   .sidebar-block {
     background: var(--cream); padding: 1.4rem;
     margin-bottom: 1.5rem; border: 1px solid var(--border);
@@ -244,6 +269,7 @@
     .detail-layout { grid-template-columns: 1fr; gap: 2rem; padding: 0 1.2rem 3rem; }
     .hero-content { flex-direction: column; gap: 1.5rem; padding: 2rem 1.2rem; }
     .hero-poster { width: 130px; transform: none; }
+    .score-actions { margin-left: 0; width: 100%; }
   }
 </style>
 {% endblock %}
@@ -285,10 +311,10 @@
 <div class="detail-wrap">
 <div class="detail-layout">
 
-  {# Main column #}
+  {# ── MAIN COLUMN ── #}
   <div class="detail-main">
 
-    {# Rating + Trailer #}
+    {# Rating + Trailer + Watchlist #}
     <div class="score-row">
       {% if movie.vote_average %}
       <div>
@@ -302,18 +328,30 @@
         <div class="score-sub">{{ movie.vote_count|default(0) }} votes</div>
       </div>
       {% endif %}
-      {% if movie.trailer_key %}
-      <a class="trailer-btn" href="https://youtube.com/watch?v={{ movie.trailer_key }}" target="_blank">
-        ▶ Watch Trailer
-      </a>
-      {% endif %}
+
+      {# Trailer + Watchlist grouped right #}
+      <div class="score-actions">
+        {% if movie.trailer_key %}
+        <a class="trailer-btn" href="https://youtube.com/watch?v={{ movie.trailer_key }}" target="_blank">
+          ▶ Watch Trailer
+        </a>
+        {% endif %}
+
+        {% if current_user.is_authenticated %}
+        <button class="wl-btn" id="wl-btn" disabled>
+          <span id="wl-icon">★</span>
+          <span id="wl-label">Watchlist</span>
+        </button>
+        {% else %}
+        <a class="wl-btn" href="{{ url_for('login') }}">
+          ★ Log in to Save
+        </a>
+        {% endif %}
+      </div>
     </div>
 
     {# ── CINEMA FINDER or Released notice ── #}
-    {# cinema_status set in Python: coming_soon | in_cinemas | left_cinemas | unknown #}
-
     {% if cinema_status == 'left_cinemas' %}
-    {# Older than 6 weeks — no longer in cinemas #}
     <div class="cinema-box released-box">
       <div class="cinema-box-header">
         <span class="cinema-box-icon">📺</span>
@@ -326,7 +364,6 @@
       </div>
     </div>
     {% else %}
-    {# Coming soon or currently in cinemas — show postcode finder #}
     <div class="cinema-box">
       <div class="cinema-box-header">
         <span class="cinema-box-icon">{% if cinema_status == 'in_cinemas' %}🎬{% else %}🎟{% endif %}</span>
@@ -354,19 +391,19 @@
           <option value="25">25 miles</option>
           <option value="40">40 miles</option>
         </select>
-        <button class="cinema-box-btn" id="cinema-btn" onclick="searchCinemas()">
-          Search
-        </button>
+        <button class="cinema-box-btn" id="cinema-btn" onclick="searchCinemas()">Search</button>
       </div>
       <div id="cinema-results"></div>
     </div>
     {% endif %}
 
+    {# Synopsis #}
     {% if movie.overview %}
     <h2 class="section-title">Synopsis</h2>
     <p class="overview-text">{{ movie.overview }}</p>
     {% endif %}
 
+    {# Cast #}
     {% if movie.top_cast %}
     <h2 class="section-title">Cast</h2>
     <div class="cast-grid">
@@ -384,6 +421,7 @@
     </div>
     {% endif %}
 
+    {# Similar Movies #}
     {% if movie.similar_movies %}
     <h2 class="section-title">You Might Also Like</h2>
     <div class="similar-grid">
@@ -406,9 +444,9 @@
     </div>
     {% endif %}
 
-  </div>{# /main #}
+  </div>{# /detail-main #}
 
-  {# Sidebar #}
+  {# ── SIDEBAR ── #}
   <aside class="detail-sidebar">
     <div class="sidebar-block">
       <h3>Film Info</h3>
@@ -440,10 +478,14 @@
 </div>
 </div>
 
+{# ── CINEMA SEARCH JS ── #}
 <script>
-  document.getElementById('cinema-loc').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') searchCinemas();
-  });
+  var cinemaLocInput = document.getElementById('cinema-loc');
+  if (cinemaLocInput) {
+    cinemaLocInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') searchCinemas();
+    });
+  }
 
   async function searchCinemas() {
     var loc    = document.getElementById('cinema-loc').value.trim();
@@ -503,5 +545,57 @@
     }
   }
 </script>
+
+{# ── WATCHLIST JS (authenticated users only) ── #}
+{% if current_user.is_authenticated %}
+<script>
+(async () => {
+  const btn   = document.getElementById('wl-btn');
+  const icon  = document.getElementById('wl-icon');
+  const label = document.getElementById('wl-label');
+ const MOVIE_ID = {{ movie.id }};
+
+  function setActive(active) {
+    if (active) {
+      btn.classList.add('active');
+      icon.textContent  = '✓';
+      label.textContent = 'In Watchlist';
+    } else {
+      btn.classList.remove('active');
+      icon.textContent  = '★';
+      label.textContent = 'Add to Watchlist';
+    }
+  }
+
+  // Load current watchlist status on page load
+  try {
+    const st = await fetch(`/api/watchlist/status?tmdb_id=${MOVIE_ID}`).then(r => r.json());
+    setActive(st.in_watchlist);
+  } catch (e) {
+    console.warn('Could not fetch watchlist status', e);
+  } finally {
+    btn.disabled = false;
+  }
+
+  // Toggle watchlist on click
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try {
+      const res  = await fetch('/api/watchlist/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tmdb_id: MOVIE_ID })
+      });
+      const data = await res.json();
+      setActive(data.status === 'added');
+    } catch (e) {
+      console.error('Watchlist toggle failed', e);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+{% endif %}
 
 {% endblock %}

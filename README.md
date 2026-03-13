@@ -1,40 +1,55 @@
 # 🎬 Cinescope — Movie Discovery App
 
-A cinematic film discovery web application built with **Python**, **Flask**, and the **TMDB API**.
-
----
+A cinematic film discovery web application built with **Python**, **Flask**, and the **TMDB API**.<br>
+🌐 **Live Demo:**https://cinescope-movie-app.onrender.com/<br>
 
 ## Features
 
-- **Trending Films** — Browse weekly or daily trending movies
-- **Film Detail Pages** — Full synopsis, cast, ratings, trailers, budget, and more
-- **Search** — Full-text movie search with pagination
-- **Similar Movies** — Discover related films from any detail page
-- **Responsive Design** — Works on desktop and mobile
+- **Trending Films** — Browse daily or weekly trending movies powered by the TMDB API  
+- **Film Detail Pages** — View full movie information including synopsis, cast, ratings, trailers, and budget  
+- **Search** — Full-text movie search with paginated results  
+- **Similar Movies** — Discover related films from any movie detail page  
+- **Responsive Design** — Optimized layout for both desktop and mobile devices  
 
+### Cinema Intelligence Dashboard
+
+- **Genre Popularity Analysis** — Visualise the distribution of trending film genres  
+- **Rating Distribution Insights** — Understand how trending films are rated by audiences  
+- **Popularity vs Quality Analysis** — Compare genre popularity with audience ratings  
+- **Trend Prediction** — Estimate which genres are likely to trend next week  
+- **Scheduling Recommendations** — Data-driven cinema screening suggestions based on audience behaviour
 ---
 
 ## Project Structure
 
 ```
+## Project Structure
+
 movie-app/
 ├── app/
-│   ├── app.py                  # Flask application & routes
+│   ├── app.py                     # Flask application and routes
 │   ├── templates/
-│   │   ├── base.html           # Shared layout + nav
-│   │   ├── index.html          # Trending movies grid
-│   │   ├── movie.html          # Film detail page
-│   │   ├── search.html         # Search results
-│   │   └── error.html          # Error page
+│   │   ├── base.html              # Shared layout and navigation
+│   │   ├── index.html             # Trending movies page
+│   │   ├── movie.html             # Movie detail page
+│   │   ├── search.html            # Search results page
+│   │   ├── analytics.html         # Cinema Intelligence Dashboard
+│   │   └── error.html             # Error page
+│   │
 │   └── services/
-│       └── tmdb_api.py         # TMDB API wrapper
+│       ├── __init__.py
+│       ├── tmdb_api.py            # TMDB API integration
+│       └── cinemas.py             # Cinema scheduling / analytics logic
+│
 ├── data/
-│   ├── u.data                  # MovieLens rating data (optional)
-│   └── u.item                  # MovieLens item data (optional)
+│   ├── u.data                     # MovieLens ratings dataset (optional)
+│   └── u.item                     # MovieLens movie metadata (optional)
+│
 ├── notebooks/
-│   └── exploration.ipynb       # Data exploration notebook
-├── requirements.txt
-├── .env.example
+│   └── exploration.ipynb          # Data exploration and analysis
+│
+├── requirements.txt               # Python dependencies
+├── .gitignore
 └── README.md
 ```
 
